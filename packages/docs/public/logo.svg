@@ -1,10 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 256 256">
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="skills-logo-title">
+  <title id="skills-logo-title">Skills Logo</title>
   <defs>
-    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="skills-bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#7c3aed"/>
       <stop offset="100%" stop-color="#2563eb"/>
     </linearGradient>
   </defs>
-  <rect width="256" height="256" rx="48" fill="url(#g)"/>
-  <text x="128" y="178" font-family="system-ui, sans-serif" font-size="160" font-weight="700" fill="white" text-anchor="middle">S</text>
+  <!-- Background -->
+  <rect width="256" height="256" rx="48" fill="url(#skills-bg)"/>
+  <!-- Lightning bolt: represents skill/capability/power -->
+  <path d="M144 40L88 136h40l-24 80 80-104h-44z" fill="white" fill-opacity="0.95"/>
 </svg>
