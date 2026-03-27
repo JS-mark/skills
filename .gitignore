@@ -31,3 +31,7 @@ npm-debug.log*
 pnpm-debug.log*
 
 */settings.local.json
+
+# VitePress
+docs/.vitepress/dist/
+docs/.vitepress/cache/
