@@ -15,8 +15,8 @@ pnpm add @aspect-mark/shared
 确保值为数组。如果已是数组则直接返回，否则包裹为单元素数组。
 
 ```ts
-toArray('hello')    // ['hello']
-toArray([1, 2, 3])  // [1, 2, 3]
+toArray('hello') // ['hello']
+toArray([1, 2, 3]) // [1, 2, 3]
 ```
 
 ### `noop()`
@@ -49,9 +49,9 @@ await sleep(1000) // 等待 1 秒
 将数值限制在 min 和 max 之间。
 
 ```ts
-clamp(5, 0, 10)   // 5
-clamp(-1, 0, 10)  // 0
-clamp(15, 0, 10)  // 10
+clamp(5, 0, 10) // 5
+clamp(-1, 0, 10) // 0
+clamp(15, 0, 10) // 10
 ```
 
 ## 构建
