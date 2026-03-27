@@ -23,9 +23,9 @@
     "lint:fix": "eslint . --fix",
     "gen:skill": "tsx scripts/gen-skill.ts",
     "release": "bumpp",
-    "docs:dev": "pnpm -C docs dev",
-    "docs:build": "pnpm -C docs build",
-    "docs:preview": "pnpm -C docs preview"
+    "docs:dev": "pnpm --filter @aspect-mark/docs dev",
+    "docs:build": "pnpm --filter @aspect-mark/docs build",
+    "docs:preview": "pnpm --filter @aspect-mark/docs preview"
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:",

@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'docs/**'
+      - 'packages/docs/**'
   workflow_dispatch:
 
 permissions:
@@ -24,23 +24,24 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm install
-        working-directory: docs
+        run: pnpm install --frozen-lockfile
 
       - name: Build docs
-        run: npx vitepress build
-        working-directory: docs
+        run: pnpm --filter @aspect-mark/docs build
 
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/.vitepress/dist
+          path: packages/docs/.vitepress/dist
 
   deploy:
     environment:

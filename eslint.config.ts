@@ -4,6 +4,6 @@ export default antfu({
   ignores: [
     'skills/**',
     'packages/agent-pipeline/src/**',
-    'docs/**',
+    'packages/docs/**',
   ],
 })

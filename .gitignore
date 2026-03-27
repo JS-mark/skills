@@ -33,5 +33,5 @@ pnpm-debug.log*
 */settings.local.json
 
 # VitePress
-docs/.vitepress/dist/
-docs/.vitepress/cache/
+packages/docs/.vitepress/dist/
+packages/docs/.vitepress/cache/
