@@ -1,0 +1,38 @@
+{
+  "name": "@aspect-mark/shared",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "Shared utilities for skills monorepo",
+  "author": "JS-mark <aspect_mark@163.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/JS-mark/skills/tree/main/packages/shared",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JS-mark/skills.git",
+    "directory": "packages/shared"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown"
+  },
+  "devDependencies": {
+    "tsdown": "catalog:"
+  }
+}

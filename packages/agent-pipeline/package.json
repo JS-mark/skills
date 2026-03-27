@@ -1,0 +1,37 @@
+{
+  "name": "@aspect-mark/agent-pipeline",
+  "type": "module",
+  "version": "2.0.0",
+  "description": "Multi-Agent Collaborative Pipeline — Claude Code MCP Plugin",
+  "author": "JS-mark <aspect_mark@163.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/JS-mark/skills/tree/main/packages/agent-pipeline",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JS-mark/skills.git",
+    "directory": "packages/agent-pipeline"
+  },
+  "keywords": [
+    "claude-code",
+    "mcp",
+    "multi-agent",
+    "pipeline",
+    "ai-agent"
+  ],
+  "exports": {
+    ".": "./src/server.js",
+    "./cli": "./src/cli.js"
+  },
+  "main": "./src/server.js",
+  "bin": {
+    "agent-pipeline": "./src/cli.js"
+  },
+  "files": [
+    "README.md",
+    "README.zh-CN.md",
+    "src"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1"
+  }
+}

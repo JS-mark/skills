@@ -1,0 +1,37 @@
+{
+  "name": "@aspect-mark/skills",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.6.5",
+  "description": "Claude Code Skills & TypeScript Utilities",
+  "author": "JS-mark <aspect_mark@163.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/JS-mark/skills",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JS-mark/skills.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JS-mark/skills/issues"
+  },
+  "scripts": {
+    "build": "pnpm -r run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "gen:skill": "tsx scripts/gen-skill.ts",
+    "release": "bumpp"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "catalog:",
+    "@types/node": "catalog:",
+    "bumpp": "catalog:",
+    "eslint": "catalog:",
+    "tsdown": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

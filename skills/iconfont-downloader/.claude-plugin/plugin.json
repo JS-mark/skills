@@ -1,0 +1,127 @@
+{
+	"name": "iconfont-downloader",
+	"description": "从阿里巴巴 Iconfont 平台搜索和下载 SVG 图标",
+	"version": "2.0.0",
+	"author": {
+		"name": "super-client"
+	},
+	"icon": "🎨",
+	"category": "design",
+	"displayName": "Iconfont 下载器",
+	"tools": [
+		{
+			"name": "login",
+			"description": "登录iconfont.cn账号。支持账号密码登录或二维码登录。登录后session会保持，其他工具才能使用。",
+			"inputSchema": {
+				"type": "object",
+				"properties": {
+					"username": {
+						"type": "string",
+						"description": "iconfont用户名/手机号（可选，如使用二维码登录可不填）"
+					},
+					"password": {
+						"type": "string",
+						"description": "iconfont密码（可选，如使用二维码登录可不填）"
+					},
+					"useQRCode": {
+						"type": "boolean",
+						"description": "是否使用二维码登录。设为true时会打开浏览器让用户扫码",
+						"default": false
+					}
+				}
+			}
+		},
+		{
+			"name": "search",
+			"description": "根据关键词搜索iconfont图标，返回图标列表供用户选择。搜索结果会缓存，供后续下载使用。",
+			"inputSchema": {
+				"type": "object",
+				"properties": {
+					"keyword": {
+						"type": "string",
+						"description": "搜索关键词，如'home', 'user', 'settings', '搜索', '首页'"
+					},
+					"limit": {
+						"type": "number",
+						"description": "返回结果数量，默认10个，最大50",
+						"default": 10
+					},
+					"page": {
+						"type": "number",
+						"description": "页码，默认1",
+						"default": 1
+					}
+				},
+				"required": ["keyword"]
+			}
+		},
+		{
+			"name": "download",
+			"description": "下载单个SVG图标到指定目录。通常用户选择后再调用此工具。",
+			"inputSchema": {
+				"type": "object",
+				"properties": {
+					"iconId": {
+						"type": "string",
+						"description": "图标ID"
+					},
+					"iconName": {
+						"type": "string",
+						"description": "图标名称，用于文件名"
+					},
+					"svgUrl": {
+						"type": "string",
+						"description": "SVG下载链接（可选，如不提供则从详情页获取）"
+					},
+					"outputPath": {
+						"type": "string",
+						"description": "保存目录路径，默认为项目 src/renderer/src/components/icons 目录"
+					},
+					"rename": {
+						"type": "string",
+						"description": "重命名文件（可选，不包含扩展名）"
+					}
+				},
+				"required": ["iconId", "iconName"]
+			}
+		},
+		{
+			"name": "downloadBatch",
+			"description": "批量下载图标。根据用户的选择字符串从搜索结果中批量下载多个图标。",
+			"inputSchema": {
+				"type": "object",
+				"properties": {
+					"selections": {
+						"type": "string",
+						"description": "用户的选择，支持格式：'1,2,3'（序号）、'1-5'（范围）、'前5个'、'all/全部'"
+					},
+					"keyword": {
+						"type": "string",
+						"description": "搜索关键词，用于从缓存中获取图标列表"
+					},
+					"outputPath": {
+						"type": "string",
+						"description": "保存目录路径，默认为项目 icons 目录"
+					}
+				},
+				"required": ["selections", "keyword"]
+			}
+		},
+		{
+			"name": "checkLoginStatus",
+			"description": "检查当前登录状态，验证session是否有效",
+			"inputSchema": {
+				"type": "object",
+				"properties": {}
+			}
+		},
+		{
+			"name": "logout",
+			"description": "退出iconfont登录，清除session",
+			"inputSchema": {
+				"type": "object",
+				"properties": {}
+			}
+		}
+	]
+}

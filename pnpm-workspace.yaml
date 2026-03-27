@@ -1,0 +1,13 @@
+packages:
+  - packages/*
+
+catalogs:
+  default:
+    '@antfu/eslint-config': ^4.19.0
+    '@types/node': ^22.19.15
+    bumpp: '*'
+    eslint: ^9.39.4
+    tsdown: ^0.12.9
+    tsx: ^4.21.0
+    typescript: ^5.9.3
+    vitest: ^3.2.4
