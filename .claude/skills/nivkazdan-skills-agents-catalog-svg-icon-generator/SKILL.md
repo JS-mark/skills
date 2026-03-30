@@ -36,20 +36,17 @@ This skill activates automatically when you:
 Request: "Help me with svg icon generator"
 Result: Provides step-by-step guidance and generates appropriate configurations
 
-
 ## Prerequisites
 
 - Relevant development environment configured
 - Access to necessary tools and services
 - Basic understanding of visual content concepts
 
-
 ## Output
 
 - Generated configurations and code
 - Best practice recommendations
 - Validation results
-
 
 ## Error Handling
 
@@ -58,7 +55,6 @@ Result: Provides step-by-step guidance and generates appropriate configurations
 | Configuration invalid | Missing required fields | Check documentation for required parameters |
 | Tool not found | Dependency not installed | Install required tools per prerequisites |
 | Permission denied | Insufficient access | Verify credentials and permissions |
-
 
 ## Resources
 
