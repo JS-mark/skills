@@ -29,8 +29,12 @@
   "files": [
     "README.md",
     "README.zh-CN.md",
-    "src"
+    "src",
+    "dashboard"
   ],
+  "scripts": {
+    "prepack": "cd ../pipeline-dashboard && pnpm build && cd .. && rm -rf agent-pipeline/dashboard && cp -r pipeline-dashboard/out agent-pipeline/dashboard"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1"
   }
