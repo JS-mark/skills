@@ -1,0 +1,108 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { api } from '@/lib/api-client'
+
+interface CodeViewerProps {
+  filePath: string | null
+}
+
+export function CodeViewer({ filePath }: CodeViewerProps) {
+  const [code, setCode] = useState('')
+  const [html, setHtml] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    if (!filePath)
+      return
+    setLoading(true)
+    api.getFileContent(filePath)
+      .then(async (text) => {
+        setCode(text)
+        // Try to use shiki for syntax highlighting
+        try {
+          const { codeToHtml } = await import('shiki')
+          const ext = filePath.split('.').pop() || 'text'
+          const langMap: Record<string, string> = {
+            js: 'javascript',
+            ts: 'typescript',
+            tsx: 'tsx',
+            jsx: 'jsx',
+            vue: 'vue',
+            css: 'css',
+            scss: 'scss',
+            html: 'html',
+            json: 'json',
+            md: 'markdown',
+            yaml: 'yaml',
+            yml: 'yaml',
+            py: 'python',
+            rs: 'rust',
+            go: 'go',
+            java: 'java',
+            sh: 'bash',
+            sql: 'sql',
+            xml: 'xml',
+          }
+          const lang = langMap[ext] || 'text'
+          const result = await codeToHtml(text, {
+            lang,
+            theme: 'github-dark',
+          })
+          setHtml(result)
+        }
+        catch {
+          setHtml('')
+        }
+      })
+      .catch(() => setCode('加载失败'))
+      .finally(() => setLoading(false))
+  }, [filePath])
+
+  async function copyCode() {
+    await navigator.clipboard.writeText(code)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (!filePath) {
+    return (
+      <div className="flex items-center justify-center h-full text-slate-500 text-sm">
+        选择一个文件查看
+      </div>
+    )
+  }
+
+  if (loading) {
+    return <div className="p-6 text-sm text-slate-500">加载中...</div>
+  }
+
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-slate-700/50 bg-slate-800/30 shrink-0">
+        <span className="text-xs text-slate-400 font-mono">{filePath}</span>
+        <button
+          onClick={copyCode}
+          className="px-2.5 py-1 text-[11px] rounded bg-slate-700 text-slate-300 hover:bg-slate-600 transition-colors"
+        >
+          {copied ? '已复制' : '复制'}
+        </button>
+      </div>
+      <div className="flex-1 overflow-auto">
+        {html
+          ? (
+              <div
+                className="p-4 text-sm [&_pre]:!bg-transparent [&_pre]:!m-0 [&_pre]:!p-0 [&_code]:!text-[13px] [&_code]:!leading-[1.6]"
+                dangerouslySetInnerHTML={{ __html: html }}
+              />
+            )
+          : (
+              <pre className="p-4 text-sm">
+                <code className="text-slate-300">{code}</code>
+              </pre>
+            )}
+      </div>
+    </div>
+  )
+}

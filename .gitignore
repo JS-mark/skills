@@ -22,7 +22,6 @@ Thumbs.db
 *.swo
 
 # Environment
-.env
 .env.local
 .env.*.local
 
@@ -35,3 +34,6 @@ pnpm-debug.log*
 # VitePress
 packages/docs/.vitepress/dist/
 packages/docs/.vitepress/cache/
+
+packages/pipeline-dashboard/out/
+packages/pipeline-dashboard/.next/
