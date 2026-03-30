@@ -22,6 +22,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "gen:skill": "tsx scripts/gen-skill.ts",
+    "update-plugin": "tsx scripts/update-plugin.ts",
     "release": "bumpp",
     "docs:dev": "pnpm --filter @aspect-mark/docs dev",
     "docs:build": "pnpm --filter @aspect-mark/docs build",
