@@ -1,7 +1,7 @@
 {
   "name": "@aspect-mark/agent-pipeline",
   "type": "module",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Multi-Agent Collaborative Pipeline — Claude Code MCP Plugin",
   "author": "JS-mark <aspect_mark@163.com>",
   "license": "MIT",
