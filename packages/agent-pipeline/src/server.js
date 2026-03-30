@@ -18,7 +18,9 @@ import { z } from "zod";
 import fs from "fs";
 import path from "path";
 import http from "http";
+import crypto from "crypto";
 import os from "os";
+import { execSync } from "child_process";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Helpers
@@ -352,143 +354,220 @@ List all 🔴 Blocker issues here. If none, write "无 Blocker 问题".
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Dashboard HTML (inline)
+// WebSocket helpers (RFC 6455, zero-dependency)
 // ═══════════════════════════════════════════════════════════════════════════
 
-function getDashboardHTML() {
-return `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Pipeline Dashboard</title>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"><\/script>
-<style>
-:root{--bg:#0f172a;--surface:#1e293b;--surface2:#334155;--border:#475569;--text:#e2e8f0;--text2:#94a3b8;--green:#22c55e;--blue:#3b82f6;--orange:#f59e0b;--red:#ef4444;--purple:#a855f7;--cyan:#06b6d4;--magenta:#d946ef}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,'SF Pro','Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.header{background:linear-gradient(135deg,#1e3a5f,#0f172a);border-bottom:1px solid var(--border);padding:20px 32px;display:flex;align-items:center;justify-content:space-between}
-.header h1{font-size:22px;font-weight:700}.header h1 span{color:var(--blue)}
-.hr{display:flex;align-items:center;gap:16px;font-size:13px;color:var(--text2)}
-.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.badge{padding:4px 12px;border-radius:12px;font-size:12px;font-weight:600}
-.b-run{background:rgba(59,130,246,.2);color:var(--blue)}.b-done{background:rgba(34,197,94,.2);color:var(--green)}
-.vtag{font-size:11px;background:rgba(168,85,247,.2);color:var(--purple);padding:2px 8px;border-radius:8px}
-.container{display:grid;grid-template-columns:380px 1fr;grid-template-rows:auto 1fr;height:calc(100vh - 73px)}
-.pipeline{padding:24px;border-right:1px solid var(--border);overflow-y:auto}
-.pipeline h2{font-size:14px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:20px}
-.stg{display:flex;gap:16px;margin-bottom:8px;position:relative}
-.stg-line{position:absolute;left:19px;top:40px;bottom:-8px;width:2px;background:var(--surface2)}.stg:last-child .stg-line{display:none}
-.stg-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;z-index:1}
-.stg-done .stg-icon{background:rgba(34,197,94,.15)}.stg-active .stg-icon{background:rgba(59,130,246,.2);animation:pulse 2s infinite}
-.stg-pending .stg-icon{background:var(--surface2);opacity:.5}.stg-failed .stg-icon{background:rgba(239,68,68,.15)}.stg-skipped .stg-icon{background:var(--surface2);opacity:.3}
-.stg-info{flex:1;padding-bottom:20px}.stg-info h3{font-size:14px;font-weight:600;margin-bottom:2px}.stg-info p{font-size:12px;color:var(--text2)}.stg-info .meta{font-size:11px;color:var(--text2);margin-top:4px}
-.stg-done .stg-info h3{color:var(--green)}.stg-active .stg-info h3{color:var(--blue)}.stg-pending .stg-info h3{color:var(--text2)}.stg-failed .stg-info h3{color:var(--red)}
-.subtasks{margin-top:8px;padding-left:4px}.subtask{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px}
-.sd{width:6px;height:6px;border-radius:50%}.sd.done{background:var(--green)}.sd.running{background:var(--blue);animation:pulse 1s infinite}.sd.pending{background:var(--surface2)}.sd.failed{background:var(--red)}
-.sn{color:var(--text2)}.ss{color:var(--text2);font-size:11px;margin-left:auto}
-.fr{margin-top:8px}.fr-bar{display:flex;gap:4px;margin-top:4px}
-.frd{width:20px;height:6px;border-radius:3px;background:var(--surface2)}.frd.passed{background:var(--green)}.frd.failed{background:var(--red)}.frd.current{background:var(--blue);animation:pulse 1s infinite}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:24px;padding-top:20px;border-top:1px solid var(--surface2)}
-.stat{background:var(--surface);border-radius:10px;padding:10px;text-align:center}
-.sv{font-size:20px;font-weight:700;color:var(--cyan)}.sl{font-size:10px;color:var(--text2);margin-top:2px}
-.tabs{grid-column:1/-1;background:var(--surface);border-bottom:1px solid var(--border);display:flex;padding:0 24px}
-.tab{padding:12px 20px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:all .2s}
-.tab:hover{color:var(--text)}.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
-.main{overflow-y:auto}.pnl{display:none;padding:24px;height:100%}.pnl.active{display:block}
-.dg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:24px}
-.dc{background:var(--surface);border:1px solid var(--surface2);border-radius:12px;padding:16px;cursor:pointer;transition:all .2s}.dc:hover{border-color:var(--blue);transform:translateY(-2px)}.dc h4{font-size:14px;margin-bottom:6px}
-.cat{font-size:11px;padding:2px 8px;border-radius:6px;font-weight:500;display:inline-block;margin-bottom:8px}
-.cat-prd{background:rgba(168,85,247,.15);color:var(--purple)}.cat-architecture{background:rgba(6,182,212,.15);color:var(--cyan)}.cat-ui-design{background:rgba(245,158,11,.15);color:var(--orange)}.cat-test-plans{background:rgba(34,197,94,.15);color:var(--green)}.cat-reviews{background:rgba(239,68,68,.15);color:var(--red)}
-.dv{background:var(--surface);border-radius:12px;padding:32px;max-width:900px}
-.dvh{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--surface2)}
-.dvb{background:var(--surface2);border:none;color:var(--text);padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px}.dvb:hover{background:var(--border)}
-.md{line-height:1.8;font-size:14px}.md h1{font-size:22px;margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--surface2)}.md h2{font-size:18px;margin:20px 0 10px;color:var(--cyan)}.md h3{font-size:15px;margin:16px 0 8px}.md p{margin:8px 0}.md code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:13px}.md pre{background:#0d1117;border-radius:8px;padding:16px;overflow-x:auto;margin:12px 0}.md pre code{background:none;padding:0}.md table{width:100%;border-collapse:collapse;margin:12px 0}.md th,.md td{border:1px solid var(--surface2);padding:8px 12px;font-size:13px;text-align:left}.md th{background:var(--surface2)}.md ul,.md ol{padding-left:24px}.md li{margin:4px 0}.md blockquote{border-left:3px solid var(--blue);padding-left:16px;color:var(--text2);margin:12px 0}
-.ft{font-family:'SF Mono','Fira Code',monospace;font-size:13px}
-.fi{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:6px;cursor:pointer}.fi:hover{background:var(--surface)}.fi .ic{width:20px;text-align:center}.fi .nm{flex:1}.fi .sz{color:var(--text2);font-size:11px}
-.fv{background:var(--surface);border-radius:12px;margin-top:16px}.fvh{padding:12px 16px;border-bottom:1px solid var(--surface2);font-weight:600;font-size:13px;display:flex;justify-content:space-between}.fv pre{padding:16px;overflow-x:auto;font-size:12px;line-height:1.6;max-height:600px;overflow-y:auto}
-.ll{margin-bottom:16px}.li{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface);border:1px solid var(--surface2);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:all .2s}.li:hover{border-color:var(--blue)}.li .ln{font-size:13px;font-weight:500;flex:1}.li .lm{font-size:11px;color:var(--text2)}
-.lc{background:#0d1117;border-radius:12px;padding:20px;font-family:'SF Mono',monospace;font-size:12px;line-height:1.7;white-space:pre-wrap;word-break:break-all;max-height:calc(100vh - 300px);overflow-y:auto;color:#c9d1d9}
-@media(max-width:900px){.container{grid-template-columns:1fr}.pipeline{border-right:none;border-bottom:1px solid var(--border)}.stats{grid-template-columns:repeat(2,1fr)}}
-</style>
-</head>
-<body>
-<div class="header">
-  <h1>📦 <span>Pipeline</span> Dashboard</h1>
-  <div class="hr"><span class="vtag">MCP Plugin</span><div class="live-dot" id="ld"></div><span id="st">加载中...</span><span class="badge" id="sb">--</span><span id="ck"></span></div>
-</div>
-<div class="tabs">
-  <button class="tab active" data-t="overview">📊 概览</button>
-  <button class="tab" data-t="docs">📄 文档</button>
-  <button class="tab" data-t="code">💻 代码</button>
-  <button class="tab" data-t="logs">📋 日志</button>
-</div>
-<div class="container">
-  <div class="pipeline"><h2>流水线进度</h2><div id="stages"></div><div class="stats" id="stats"></div></div>
-  <div class="main">
-    <div class="pnl active" id="p-overview"><div id="oDocs"></div></div>
-    <div class="pnl" id="p-docs"><div id="dList"></div><div id="dView" style="display:none"></div></div>
-    <div class="pnl" id="p-code"><div id="fTree"></div><div id="fView"></div></div>
-    <div class="pnl" id="p-logs"><div id="lList"></div><div id="lView"></div></div>
-  </div>
-</div>
-<script>
-const PI={1:'📋',2:'🏗️',3:'💻',4:'🔍',5:'🔧',6:'🧪',7:'🔄'},PD={1:'需求分析与 PRD',2:'架构 + UI + 测试计划',3:'功能代码实现',4:'代码质量审查',5:'修复审查问题',6:'编写测试并执行',7:'Bug 修复 + 重新测试'},RL={architect:'架构师','ui-designer':'UI 设计师',tester:'测试工程师'};
-document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.pnl').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById('p-'+b.dataset.t).classList.add('active')}));
-setInterval(()=>{document.getElementById('ck').textContent=new Date().toLocaleTimeString('zh-CN')},1000);
-function fmtSz(b){if(!b)return'0 B';if(b<1024)return b+' B';if(b<1048576)return(b/1024).toFixed(1)+' KB';return(b/1048576).toFixed(1)+' MB'}
-function ago(d){const s=Math.floor((Date.now()-new Date(d))/1000);if(s<60)return s+'秒前';if(s<3600)return Math.floor(s/60)+'分钟前';if(s<86400)return Math.floor(s/3600)+'小时前';return Math.floor(s/86400)+'天前'}
-function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+const wsClients = new Set();
 
-function renderStages(data){const{phases,currentPhase:cp,fixRounds:fr}=data;let h='';
-for(const p of phases){const s=p.status||'pending',act=p.id===cp&&s==='running',c=s==='done'?'stg-done':act?'stg-active':s==='failed'?'stg-failed':s==='skipped'?'stg-skipped':'stg-pending';
-const sl={done:'✅ 完成',running:'🔄 执行中...',pending:'⏳ 等待',failed:'❌ 失败',skipped:'⏭️ 跳过'}[s]||'⏳';
-let m='';if(p.fileSize)m=fmtSz(p.fileSize);if(p.fileCount)m=p.fileCount+' 文件'+(p.fileSize?' / '+fmtSz(p.fileSize):'');
-h+='<div class="stg '+c+'"><div class="stg-line"></div><div class="stg-icon">'+(PI[p.id]||'📌')+'</div><div class="stg-info"><h3>Phase '+p.id+': '+p.name+'</h3><p>'+(PD[p.id]||p.name)+' — '+sl+'</p>'+(m?'<div class="meta">'+m+'</div>':'');
-if(p.id===2&&p.subtasks){h+='<div class="subtasks">';for(const t of p.subtasks)h+='<div class="subtask"><div class="sd '+(t.status||'pending')+'"></div><span class="sn">'+(RL[t.role]||t.role)+'</span><span class="ss">'+(t.fileSize?fmtSz(t.fileSize):'')+'</span></div>';h+='</div>'}
-if(p.id===7&&fr){const{current:cur,max,results:r}=fr;if(cur>0||s==='running'){h+='<div class="fr"><span style="font-size:11px;color:var(--text2)">修复轮次: '+cur+'/'+max+'</span><div class="fr-bar">';for(let i=0;i<max;i++){let dc='';if(i<r.length)dc=r[i]==='passed'?'passed':'failed';else if(i===r.length&&s==='running')dc='current';h+='<div class="frd '+dc+'"></div>'}h+='</div></div>'}}
-h+='</div></div>'}
-document.getElementById('stages').innerHTML=h;
-const dn=phases.filter(x=>x.status==='done').length,tot=phases.length,sc=data.srcFiles?data.srcFiles.length:0,ts=phases.reduce((a,x)=>a+(x.fileSize||0),0),rn=fr?fr.current:0;
-document.getElementById('stats').innerHTML='<div class="stat"><div class="sv">'+dn+'/'+tot+'</div><div class="sl">阶段</div></div><div class="stat"><div class="sv">'+sc+'</div><div class="sl">代码</div></div><div class="stat"><div class="sv">'+fmtSz(ts)+'</div><div class="sl">产出</div></div><div class="stat"><div class="sv">'+rn+'</div><div class="sl">修复轮</div></div>';
-const bd=document.getElementById('sb'),st=document.getElementById('st'),ad=phases.every(x=>x.status==='done'||x.status==='skipped');
-if(data.status==='done'||ad){bd.className='badge b-done';bd.textContent='已完成';st.textContent='全部完成';document.getElementById('ld').style.animation='none'}
-else{bd.className='badge b-run';bd.textContent='Phase '+cp;const cu=phases.find(x=>x.id===cp);st.textContent=cu?cu.name+'执行中':'运行中'}}
+function wsBroadcast(msg) {
+  const data = JSON.stringify(msg);
+  for (const ws of wsClients) {
+    try { wsSend(ws, data); } catch { wsClients.delete(ws); }
+  }
+}
 
-function renderDocs(docs){const cl={prd:'PRD',architecture:'架构','ui-design':'UI','test-plans':'测试',reviews:'审查'};
-const g=docs.map(d=>'<div class="dc" onclick="viewDoc(\\''+d.path+'\\')"><div class="cat cat-'+d.category+'">'+(cl[d.category]||d.category)+'</div><h4>'+d.name+'</h4><div style="font-size:11px;color:var(--text2)">'+fmtSz(d.size)+(d.mtime?' · '+ago(d.mtime):'')+'</div></div>').join('');
-document.getElementById('oDocs').innerHTML='<h2 style="margin-bottom:16px;font-size:16px">📄 文档</h2><div class="dg">'+g+'</div>';
-document.getElementById('dList').innerHTML='<div class="dg">'+g+'</div>'}
+function wsSend(socket, data) {
+  const buf = Buffer.from(data);
+  let header;
+  if (buf.length < 126) {
+    header = Buffer.alloc(2);
+    header[0] = 0x81;
+    header[1] = buf.length;
+  } else if (buf.length < 65536) {
+    header = Buffer.alloc(4);
+    header[0] = 0x81;
+    header[1] = 126;
+    header.writeUInt16BE(buf.length, 2);
+  } else {
+    header = Buffer.alloc(10);
+    header[0] = 0x81;
+    header[1] = 127;
+    header.writeBigUInt64BE(BigInt(buf.length), 2);
+  }
+  socket.write(Buffer.concat([header, buf]));
+}
 
-async function viewDoc(p){document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.pnl').forEach(x=>x.classList.remove('active'));document.querySelector('[data-t="docs"]').classList.add('active');document.getElementById('p-docs').classList.add('active');
-const r=await fetch('/api/doc?path='+encodeURIComponent(p));const t=await r.text();document.getElementById('dList').style.display='none';const v=document.getElementById('dView');v.style.display='block';
-v.innerHTML='<div class="dv"><div class="dvh"><span>'+p+'</span><button class="dvb" onclick="closeDV()">← 返回</button></div><div class="md">'+marked.parse(t)+'</div></div>'}
-function closeDV(){document.getElementById('dList').style.display='';document.getElementById('dView').style.display='none'}
+function wsParseFrame(buf) {
+  if (buf.length < 2) return null;
+  const masked = (buf[1] & 0x80) !== 0;
+  let payloadLen = buf[1] & 0x7f;
+  let offset = 2;
+  if (payloadLen === 126) { payloadLen = buf.readUInt16BE(2); offset = 4; }
+  else if (payloadLen === 127) { payloadLen = Number(buf.readBigUInt64BE(2)); offset = 10; }
+  const maskOffset = offset;
+  if (masked) offset += 4;
+  if (buf.length < offset + payloadLen) return null;
+  const payload = Buffer.alloc(payloadLen);
+  for (let i = 0; i < payloadLen; i++) {
+    payload[i] = masked ? buf[offset + i] ^ buf[maskOffset + (i % 4)] : buf[offset + i];
+  }
+  return { opcode: buf[0] & 0x0f, payload, totalLength: offset + payloadLen };
+}
 
-function renderFiles(files){if(!files||!files.length){document.getElementById('fTree').innerHTML='<p style="color:var(--text2);padding:20px">暂无代码...</p>';return}
-const dirs={};for(const f of files){const p=f.path.split('/'),d=p.length>1?p.slice(0,-1).join('/'):'.';if(!dirs[d])dirs[d]=[];dirs[d].push(f)}
-let h='';for(const[d,items]of Object.entries(dirs).sort()){h+='<div style="margin-bottom:16px"><div style="font-size:12px;color:var(--text2);margin-bottom:4px;padding:4px 12px">📁 src/'+d+'</div>';
-for(const f of items){const ext=f.path.split('.').pop(),ic={js:'📜',ts:'🔷',json:'📋',vue:'💚',css:'🎨'}[ext]||'📄';
-h+='<div class="fi" onclick="viewFile(\\''+f.path+'\\')"><span class="ic">'+ic+'</span><span class="nm">'+f.path.split('/').pop()+'</span><span class="sz">'+fmtSz(f.size)+'</span></div>'}h+='</div>'}
-document.getElementById('fTree').innerHTML=h}
-async function viewFile(p){const r=await fetch('/api/file?path='+encodeURIComponent(p));const t=await r.text();document.getElementById('fView').innerHTML='<div class="fv"><div class="fvh"><span>src/'+p+'</span><span style="color:var(--text2);font-weight:400">'+fmtSz(t.length)+'</span></div><pre><code>'+esc(t)+'</code></pre></div>'}
+function handleWsUpgrade(req, socket) {
+  const key = req.headers['sec-websocket-key'];
+  if (!key) { socket.destroy(); return; }
+  const accept = crypto.createHash('sha1').update(key + '258EAFA5-E914-47DA-95CA-5AB541DC65BD').digest('base64');
+  socket.write(
+    'HTTP/1.1 101 Switching Protocols\r\n' +
+    'Upgrade: websocket\r\n' +
+    'Connection: Upgrade\r\n' +
+    `Sec-WebSocket-Accept: ${accept}\r\n\r\n`
+  );
+  wsClients.add(socket);
+  let buffer = Buffer.alloc(0);
+  socket.on('data', (chunk) => {
+    buffer = Buffer.concat([buffer, chunk]);
+    while (true) {
+      const frame = wsParseFrame(buffer);
+      if (!frame) break;
+      buffer = buffer.slice(frame.totalLength);
+      if (frame.opcode === 0x8) { socket.end(); wsClients.delete(socket); return; } // close
+      if (frame.opcode === 0x9) { // ping -> pong
+        const pong = Buffer.alloc(2); pong[0] = 0x8a; pong[1] = 0;
+        socket.write(pong);
+      }
+    }
+  });
+  socket.on('close', () => wsClients.delete(socket));
+  socket.on('error', () => wsClients.delete(socket));
+}
 
-function renderLogs(logs){if(!logs||!logs.length){document.getElementById('lList').innerHTML='<p style="color:var(--text2);padding:20px">暂无日志...</p>';return}
-let h='<h2 style="margin-bottom:16px;font-size:16px">📋 日志</h2><div class="ll">';for(const l of logs)h+='<div class="li" onclick="viewLog(\\''+l.name+'\\')"><span class="ln">'+l.name+'</span><span class="lm">'+fmtSz(l.size)+(l.mtime?' · '+ago(l.mtime):'')+'</span></div>';
-h+='</div>';document.getElementById('lList').innerHTML=h}
-async function viewLog(n){const r=await fetch('/api/logs?file='+encodeURIComponent(n));const t=await r.text();document.getElementById('lView').innerHTML='<h3 style="margin:16px 0 8px;font-size:14px">'+n+'</h3><div class="lc">'+esc(t)+'</div>'}
-
-async function refresh(){try{const[sr,dr,lr]=await Promise.all([fetch('/api/status'),fetch('/api/docs'),fetch('/api/logs')]);
-const s=await sr.json(),d=await dr.json(),l=await lr.json();renderStages(s);renderDocs(d);renderFiles(s.srcFiles);renderLogs(l)}catch(e){console.error(e)}}
-refresh();setInterval(refresh,5000);
-<\/script></body></html>`;
+// Enhanced writeStatus: broadcast on change
+const _origWriteStatus = writeStatus;
+function writeStatusAndBroadcast(root, data) {
+  _origWriteStatus(root, data);
+  wsBroadcast({ type: 'status', data: getEnrichedStatus(root) });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Dashboard Server
+// Role management helpers
+// ═══════════════════════════════════════════════════════════════════════════
+
+const BUILT_IN_ROLES = new Set(['pm', 'architect', 'ui-designer', 'fullstack', 'tester', 'reviewer']);
+
+const EXTRA_ROLE_TEMPLATES = {
+  'devops': `# Role: DevOps Engineer\n\nYou are a senior DevOps engineer responsible for CI/CD pipelines, infrastructure, and deployment.\n\n## Core Responsibilities\n- Set up CI/CD pipelines\n- Configure deployment environments\n- Write Dockerfiles and compose files\n- Manage infrastructure as code\n\n## Output\nAll output goes to \`docs/devops/\`, filename: \`feature-<name>.md\``,
+  'dba': `# Role: Database Administrator\n\nYou are a senior DBA responsible for database schema design, migrations, and optimization.\n\n## Core Responsibilities\n- Design database schemas\n- Write migration scripts\n- Optimize queries and indexes\n- Plan data backup strategies\n\n## Output\nAll output goes to \`docs/database/\`, filename: \`feature-<name>.md\``,
+  'security-auditor': `# Role: Security Auditor\n\nYou are a senior security engineer responsible for security review and vulnerability assessment.\n\n## Core Responsibilities\n- Review code for security vulnerabilities (OWASP Top 10)\n- Check authentication and authorization logic\n- Validate input sanitization\n- Assess dependency security\n\n## Output\nAll output goes to \`docs/security/\`, filename: \`feature-<name>.md\``,
+  'tech-writer': `# Role: Technical Writer\n\nYou are a senior technical writer responsible for user-facing documentation.\n\n## Core Responsibilities\n- Write API documentation\n- Create user guides and tutorials\n- Maintain README files\n- Document architecture decisions (ADRs)\n\n## Output\nAll output goes to \`docs/guides/\`, filename: \`feature-<name>.md\``,
+};
+
+function getRoles(root) {
+  const rolesDir = path.join(root, '.claude/roles');
+  if (!dirExists(rolesDir)) return [];
+  return fs.readdirSync(rolesDir).filter(f => f.endsWith('.md')).map(f => {
+    const name = f.replace('.md', '');
+    const fp = path.join(rolesDir, f);
+    return {
+      name,
+      filename: f,
+      content: fs.readFileSync(fp, 'utf-8'),
+      builtIn: BUILT_IN_ROLES.has(name),
+      size: fileSize(fp),
+    };
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Code management helpers
+// ═══════════════════════════════════════════════════════════════════════════
+
+function buildFileTree(dir, prefix = '') {
+  const result = [];
+  if (!dirExists(dir)) return result;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (['node_modules', '.git', '__pycache__', '.claude', '.next', 'out'].includes(entry.name)) continue;
+    const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
+    const abs = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      result.push({ name: entry.name, path: rel, type: 'directory', children: buildFileTree(abs, rel) });
+    } else {
+      result.push({ name: entry.name, path: rel, type: 'file', size: fileSize(abs), mtime: fileMtime(abs) });
+    }
+  }
+  return result;
+}
+
+function countLines(filePath) {
+  try { return fs.readFileSync(filePath, 'utf-8').split('\n').length; } catch { return 0; }
+}
+
+function getCodeStats(root) {
+  const srcDir = path.join(root, 'src');
+  const files = walkDir(srcDir);
+  const languages = {};
+  let totalLines = 0;
+  let totalSize = 0;
+  for (const f of files) {
+    const ext = f.path.split('.').pop() || 'other';
+    languages[ext] = (languages[ext] || 0) + 1;
+    totalLines += countLines(path.join(srcDir, f.path));
+    totalSize += f.size;
+  }
+  return { totalFiles: files.length, totalLines, totalSize, languages };
+}
+
+function searchFiles(root, query) {
+  const srcDir = path.join(root, 'src');
+  const files = walkDir(srcDir);
+  const results = [];
+  const lowerQ = query.toLowerCase();
+  for (const f of files) {
+    if (results.length >= 50) break;
+    // Match filename
+    if (f.path.toLowerCase().includes(lowerQ)) {
+      results.push({ file: f.path, line: 0, text: f.path });
+      continue;
+    }
+    // Match content
+    try {
+      const abs = path.join(srcDir, f.path);
+      const lines = fs.readFileSync(abs, 'utf-8').split('\n');
+      for (let i = 0; i < lines.length && results.length < 50; i++) {
+        if (lines[i].toLowerCase().includes(lowerQ)) {
+          results.push({ file: f.path, line: i + 1, text: lines[i].trim().slice(0, 200) });
+        }
+      }
+    } catch {}
+  }
+  return results;
+}
+
+function getGitDiff(root) {
+  try { return execSync('git diff --stat && echo "---" && git diff', { cwd: root, encoding: 'utf-8', maxBuffer: 5 * 1024 * 1024, timeout: 10000 }); }
+  catch { return 'Git diff not available'; }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Dashboard Server (Enhanced)
 // ═══════════════════════════════════════════════════════════════════════════
 
 let dashboardServer = null;
+
+function safePath(root, ...parts) {
+  const abs = path.resolve(root, ...parts);
+  if (!abs.startsWith(path.resolve(root))) return null;
+  return abs;
+}
+
+function jsonReply(res, data, status = 200) {
+  res.writeHead(status, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify(data));
+}
+
+function textReply(res, text, status = 200) {
+  res.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8' });
+  res.end(text);
+}
+
+function readBody(req) {
+  return new Promise((resolve) => {
+    let body = '';
+    req.on('data', c => { body += c; if (body.length > 1e6) req.destroy(); });
+    req.on('end', () => { try { resolve(JSON.parse(body)); } catch { resolve({}); } });
+  });
+}
 
 function startDashboard(root, port) {
   if (dashboardServer) {
@@ -496,54 +575,250 @@ function startDashboard(root, port) {
     dashboardServer = null;
   }
 
-  const srv = http.createServer((req, res) => {
+  const srv = http.createServer(async (req, res) => {
     const url = new URL(req.url, `http://localhost:${port}`);
     const p = url.pathname;
-    res.setHeader('Access-Control-Allow-Origin', '*');
 
-    if (p === '/api/status') {
-      const data = getEnrichedStatus(root);
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(data));
-      return;
-    }
-    if (p === '/api/docs') {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(getDocuments(root)));
-      return;
-    }
+    // CORS
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
+
+    // ─── Existing API endpoints ───
+    if (p === '/api/status') { return jsonReply(res, getEnrichedStatus(root)); }
+    if (p === '/api/docs') { return jsonReply(res, getDocuments(root)); }
+
     if (p === '/api/doc') {
       const dp = url.searchParams.get('path');
       if (!dp) { res.writeHead(400); res.end('missing path'); return; }
-      const abs = path.join(root, dp);
-      if (!abs.startsWith(root) || !fileExists(abs)) { res.writeHead(404); res.end('not found'); return; }
-      res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
-      res.end(fs.readFileSync(abs, 'utf-8'));
-      return;
+      const abs = safePath(root, dp);
+      if (!abs || !fileExists(abs)) { res.writeHead(404); res.end('not found'); return; }
+      return textReply(res, fs.readFileSync(abs, 'utf-8'));
     }
+
     if (p === '/api/file') {
       const fp = url.searchParams.get('path');
       if (!fp) { res.writeHead(400); res.end('missing path'); return; }
-      const abs = path.join(root, 'src', fp);
-      if (!abs.startsWith(root) || !fileExists(abs)) { res.writeHead(404); res.end('not found'); return; }
-      res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
-      res.end(fs.readFileSync(abs, 'utf-8'));
-      return;
+      const abs = safePath(root, 'src', fp);
+      if (!abs || !fileExists(abs)) { res.writeHead(404); res.end('not found'); return; }
+      const content = fs.readFileSync(abs, 'utf-8');
+      if (content.length > 2 * 1024 * 1024) return textReply(res, '文件过大', 413);
+      return textReply(res, content);
     }
+
     if (p === '/api/logs') {
       const file = url.searchParams.get('file');
       const ld = logDir(root);
       if (file) {
         const abs = path.join(ld, path.basename(file));
         const content = abs.startsWith(ld) && fileExists(abs) ? fs.readFileSync(abs, 'utf-8').replace(/\x1b\[[0-9;]*m/g, '') : '';
-        res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' }); res.end(content);
-      } else {
-        const logs = dirExists(ld) ? fs.readdirSync(ld).filter(f => f.endsWith('.log')).map(f => ({ name: f, size: fileSize(path.join(ld, f)), mtime: fileMtime(path.join(ld, f)) })) : [];
-        res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(logs));
+        return textReply(res, content);
       }
+      const logs = dirExists(ld) ? fs.readdirSync(ld).filter(f => f.endsWith('.log')).map(f => ({ name: f, size: fileSize(path.join(ld, f)), mtime: fileMtime(path.join(ld, f)) })) : [];
+      return jsonReply(res, logs);
+    }
+
+    // ─── SSE: Log stream ───
+    if (p === '/api/logs/stream') {
+      const file = url.searchParams.get('file');
+      if (!file) { res.writeHead(400); res.end('missing file'); return; }
+      const abs = path.join(logDir(root), path.basename(file));
+      if (!abs.startsWith(logDir(root))) { res.writeHead(403); res.end('forbidden'); return; }
+      res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive' });
+      let lastSize = fileExists(abs) ? fs.statSync(abs).size : 0;
+      const interval = setInterval(() => {
+        try {
+          if (!fileExists(abs)) return;
+          const currentSize = fs.statSync(abs).size;
+          if (currentSize > lastSize) {
+            const fd = fs.openSync(abs, 'r');
+            const buf = Buffer.alloc(currentSize - lastSize);
+            fs.readSync(fd, buf, 0, buf.length, lastSize);
+            fs.closeSync(fd);
+            const chunk = buf.toString('utf-8').replace(/\x1b\[[0-9;]*m/g, '');
+            res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+            lastSize = currentSize;
+          }
+        } catch {}
+      }, 1000);
+      req.on('close', () => clearInterval(interval));
       return;
     }
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); res.end(getDashboardHTML());
+
+    // ─── Control API ───
+    if (p === '/api/control/pause' && req.method === 'POST') {
+      const data = readStatus(root);
+      if (!data) return jsonReply(res, { error: 'No pipeline' }, 404);
+      data.status = 'paused';
+      writeStatusAndBroadcast(root, data);
+      return jsonReply(res, { ok: true, status: 'paused' });
+    }
+
+    if (p === '/api/control/resume' && req.method === 'POST') {
+      const data = readStatus(root);
+      if (!data) return jsonReply(res, { error: 'No pipeline' }, 404);
+      data.status = 'running';
+      writeStatusAndBroadcast(root, data);
+      return jsonReply(res, { ok: true, status: 'running' });
+    }
+
+    if (p === '/api/control/cancel' && req.method === 'POST') {
+      const body = await readBody(req);
+      const data = readStatus(root);
+      if (!data) return jsonReply(res, { error: 'No pipeline' }, 404);
+      if (body.scope === 'pipeline') {
+        data.status = 'cancelled';
+        for (const phase of data.phases) {
+          if (phase.status === 'pending' || phase.status === 'running') phase.status = 'cancelled';
+          if (phase.subtasks) {
+            for (const st of phase.subtasks) {
+              if (st.status === 'pending' || st.status === 'running') st.status = 'cancelled';
+            }
+          }
+        }
+        data.completedAt = isoNow();
+      } else if (body.scope === 'phase' && body.phaseId) {
+        const phase = data.phases.find(p => p.id === body.phaseId);
+        if (phase) phase.status = 'skipped';
+      }
+      writeStatusAndBroadcast(root, data);
+      return jsonReply(res, { ok: true });
+    }
+
+    if (p === '/api/control/retry' && req.method === 'POST') {
+      const body = await readBody(req);
+      const data = readStatus(root);
+      if (!data) return jsonReply(res, { error: 'No pipeline' }, 404);
+      const phase = data.phases.find(p => p.id === body.phaseId);
+      if (phase) {
+        phase.status = 'pending';
+        delete phase.error;
+        delete phase.completedAt;
+        if (data.status === 'failed') data.status = 'running';
+      }
+      writeStatusAndBroadcast(root, data);
+      return jsonReply(res, { ok: true });
+    }
+
+    if (p === '/api/control/skip-to' && req.method === 'POST') {
+      const body = await readBody(req);
+      const data = readStatus(root);
+      if (!data) return jsonReply(res, { error: 'No pipeline' }, 404);
+      const target = body.phaseId;
+      for (const phase of data.phases) {
+        if (phase.id < target && (phase.status === 'pending' || phase.status === 'running')) {
+          phase.status = 'skipped';
+        }
+      }
+      data.currentPhase = target;
+      writeStatusAndBroadcast(root, data);
+      return jsonReply(res, { ok: true });
+    }
+
+    // ─── Roles API ───
+    if (p === '/api/roles' && req.method === 'GET') {
+      return jsonReply(res, getRoles(root));
+    }
+
+    if (p === '/api/roles/templates' && req.method === 'GET') {
+      return jsonReply(res, EXTRA_ROLE_TEMPLATES);
+    }
+
+    if (p.startsWith('/api/roles/') && p !== '/api/roles/templates') {
+      const name = decodeURIComponent(p.split('/api/roles/')[1]).replace(/\/$/, '');
+      const rolesDir = path.join(root, '.claude/roles');
+      const filePath = path.join(rolesDir, `${name}.md`);
+
+      if (req.method === 'GET') {
+        if (!fileExists(filePath)) return jsonReply(res, { error: 'not found' }, 404);
+        const content = fs.readFileSync(filePath, 'utf-8');
+        return jsonReply(res, { name, filename: `${name}.md`, content, builtIn: BUILT_IN_ROLES.has(name), size: fileSize(filePath) });
+      }
+      if (req.method === 'PUT') {
+        const body = await readBody(req);
+        if (!body.content) return jsonReply(res, { error: 'missing content' }, 400);
+        fs.mkdirSync(rolesDir, { recursive: true });
+        fs.writeFileSync(filePath, body.content);
+        return jsonReply(res, { ok: true });
+      }
+      if (req.method === 'DELETE') {
+        if (BUILT_IN_ROLES.has(name)) return jsonReply(res, { error: 'cannot delete built-in role' }, 403);
+        if (fileExists(filePath)) fs.unlinkSync(filePath);
+        return jsonReply(res, { ok: true });
+      }
+    }
+
+    if (p === '/api/roles' && req.method === 'POST') {
+      const body = await readBody(req);
+      if (!body.name) return jsonReply(res, { error: 'missing name' }, 400);
+      const rolesDir = path.join(root, '.claude/roles');
+      fs.mkdirSync(rolesDir, { recursive: true });
+      const filePath = path.join(rolesDir, `${body.name}.md`);
+      if (fileExists(filePath)) return jsonReply(res, { error: 'role already exists' }, 409);
+      fs.writeFileSync(filePath, body.content || `# Role: ${body.name}\n\nDescribe responsibilities here.\n`);
+      return jsonReply(res, { ok: true });
+    }
+
+    // ─── Code API ───
+    if (p === '/api/code/tree') {
+      return jsonReply(res, buildFileTree(path.join(root, 'src')));
+    }
+    if (p === '/api/code/stats') {
+      return jsonReply(res, getCodeStats(root));
+    }
+    if (p === '/api/code/search') {
+      const q = url.searchParams.get('q');
+      if (!q) return jsonReply(res, []);
+      return jsonReply(res, searchFiles(root, q));
+    }
+    if (p === '/api/code/diff') {
+      return textReply(res, getGitDiff(root));
+    }
+
+    // ─── Export (simple tar-like zip placeholder — returns file list for now) ───
+    if (p === '/api/export') {
+      const docs = getDocuments(root);
+      const srcFiles = walkDir(path.join(root, 'src'));
+      return jsonReply(res, { docs: docs.map(d => d.path), src: srcFiles.map(f => 'src/' + f.path) });
+    }
+
+    // ─── Serve Next.js static export (out/) ───
+    const selfDir = import.meta.dirname || path.dirname(new URL(import.meta.url).pathname);
+    const dashDir = [
+      path.resolve(selfDir, '../dashboard'),                   // npm package: src/ → agent-pipeline/dashboard/
+      path.resolve(selfDir, 'dashboard'),                     // local plugin: agent-pipeline/dashboard/
+      path.resolve(selfDir, '../../pipeline-dashboard/out'),  // source monorepo: src/ → packages/pipeline-dashboard/out/
+    ].find(d => dirExists(d));
+    if (dashDir) {
+      let filePath = path.join(dashDir, p === '/' ? 'index.html' : p);
+      // Try exact file, then with .html, then index.html in directory
+      if (!fileExists(filePath) && !filePath.endsWith('.html')) {
+        if (fileExists(filePath + '.html')) filePath = filePath + '.html';
+        else if (dirExists(filePath) && fileExists(path.join(filePath, 'index.html'))) filePath = path.join(filePath, 'index.html');
+        else filePath = path.join(dashDir, 'index.html'); // SPA fallback
+      }
+      if (fileExists(filePath) && filePath.startsWith(dashDir)) {
+        const ext = path.extname(filePath);
+        const mimeTypes = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf' };
+        res.writeHead(200, { 'Content-Type': (mimeTypes[ext] || 'application/octet-stream') + (ext === '.html' || ext === '.css' || ext === '.js' ? '; charset=utf-8' : '') });
+        res.end(fs.readFileSync(filePath));
+        return;
+      }
+    }
+
+    // Fallback: prompt to build the Next.js dashboard
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pipeline Dashboard</title></head><body style="font-family:system-ui;background:#0f172a;color:#e2e8f0;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0"><div style="text-align:center;max-width:480px"><h1 style="font-size:24px;margin-bottom:16px">Pipeline Dashboard</h1><p style="color:#94a3b8;margin-bottom:24px">Dashboard has not been built yet.</p><code style="background:#1e293b;padding:12px 20px;border-radius:8px;display:block;font-size:14px;color:#38bdf8">pnpm --filter @aspect-mark/pipeline-dashboard build</code></div></body></html>');
+  });
+
+  // WebSocket upgrade
+  srv.on('upgrade', (req, socket, head) => {
+    if (req.url === '/ws') {
+      handleWsUpgrade(req, socket);
+    } else {
+      socket.destroy();
+    }
   });
 
   srv.listen(port);
@@ -713,7 +988,7 @@ server.tool(
       fixRounds: { current: 0, max: maxFixRounds, results: [] },
     };
     for (let i = 1; i < startPhase; i++) data.phases[i - 1].status = 'skipped';
-    writeStatus(root, data);
+    writeStatusAndBroadcast(root, data);
     return { content: [{ type: "text", text: `Pipeline status initialized for feature "${feature}" starting at Phase ${startPhase}` }] };
   }
 );
@@ -744,7 +1019,7 @@ server.tool(
       if (phase) phase.status = status;
     }
     data.currentPhase = phaseId;
-    writeStatus(root, data);
+    writeStatusAndBroadcast(root, data);
 
     const target = subtaskRole ? `Phase ${phaseId}/${subtaskRole}` : `Phase ${phaseId}`;
     return { content: [{ type: "text", text: `Updated ${target} → ${status}` }] };
@@ -766,7 +1041,7 @@ server.tool(
     if (!data) return { content: [{ type: "text", text: "No pipeline status file found." }] };
     data.fixRounds.current = round;
     data.fixRounds.results.push(result);
-    writeStatus(root, data);
+    writeStatusAndBroadcast(root, data);
     return { content: [{ type: "text", text: `Fix round ${round}: ${result}` }] };
   }
 );
@@ -785,7 +1060,7 @@ server.tool(
     if (!data) return { content: [{ type: "text", text: "No pipeline status file found." }] };
     data.status = status;
     data.completedAt = isoNow();
-    writeStatus(root, data);
+    writeStatusAndBroadcast(root, data);
     return { content: [{ type: "text", text: `Pipeline finalized: ${status} at ${data.completedAt}` }] };
   }
 );
@@ -808,6 +1083,154 @@ server.tool(
       return { content: [{ type: "text", text: `Role file not found: ${p}` }] };
     }
     return { content: [{ type: "text", text: fs.readFileSync(p, 'utf-8') }] };
+  }
+);
+
+// ── Tool: pipeline_pause ──
+server.tool(
+  "pipeline_pause",
+  "Pause the running pipeline. Agents should check status and halt when paused.",
+  { root: z.string().optional().describe("Project root path") },
+  async ({ root: rootArg }) => {
+    const root = resolveRoot(rootArg);
+    const data = readStatus(root);
+    if (!data) return { content: [{ type: "text", text: "No pipeline status file found." }] };
+    data.status = 'paused';
+    writeStatusAndBroadcast(root, data);
+    return { content: [{ type: "text", text: "Pipeline paused." }] };
+  }
+);
+
+// ── Tool: pipeline_resume ──
+server.tool(
+  "pipeline_resume",
+  "Resume a paused pipeline.",
+  { root: z.string().optional().describe("Project root path") },
+  async ({ root: rootArg }) => {
+    const root = resolveRoot(rootArg);
+    const data = readStatus(root);
+    if (!data) return { content: [{ type: "text", text: "No pipeline status file found." }] };
+    data.status = 'running';
+    writeStatusAndBroadcast(root, data);
+    return { content: [{ type: "text", text: "Pipeline resumed." }] };
+  }
+);
+
+// ── Tool: pipeline_cancel ──
+server.tool(
+  "pipeline_cancel",
+  "Cancel a phase or the entire pipeline",
+  {
+    root: z.string().optional().describe("Project root path"),
+    scope: z.enum(['phase', 'pipeline']).describe("Cancel scope: single phase or entire pipeline"),
+    phaseId: z.number().optional().describe("Phase ID to cancel (when scope=phase)"),
+  },
+  async ({ root: rootArg, scope, phaseId }) => {
+    const root = resolveRoot(rootArg);
+    const data = readStatus(root);
+    if (!data) return { content: [{ type: "text", text: "No pipeline status file found." }] };
+    if (scope === 'pipeline') {
+      data.status = 'cancelled';
+      for (const phase of data.phases) {
+        if (phase.status === 'pending' || phase.status === 'running') phase.status = 'cancelled';
+        if (phase.subtasks) phase.subtasks.forEach(st => { if (st.status === 'pending' || st.status === 'running') st.status = 'cancelled'; });
+      }
+      data.completedAt = isoNow();
+    } else if (phaseId) {
+      const phase = data.phases.find(p => p.id === phaseId);
+      if (phase) phase.status = 'skipped';
+    }
+    writeStatusAndBroadcast(root, data);
+    return { content: [{ type: "text", text: scope === 'pipeline' ? "Pipeline cancelled." : `Phase ${phaseId} skipped.` }] };
+  }
+);
+
+// ── Tool: pipeline_retry ──
+server.tool(
+  "pipeline_retry",
+  "Retry a failed phase by resetting it to pending",
+  {
+    root: z.string().optional().describe("Project root path"),
+    phaseId: z.number().min(1).max(7).describe("Phase ID to retry"),
+  },
+  async ({ root: rootArg, phaseId }) => {
+    const root = resolveRoot(rootArg);
+    const data = readStatus(root);
+    if (!data) return { content: [{ type: "text", text: "No pipeline status file found." }] };
+    const phase = data.phases.find(p => p.id === phaseId);
+    if (phase) { phase.status = 'pending'; delete phase.error; }
+    if (data.status === 'failed') data.status = 'running';
+    writeStatusAndBroadcast(root, data);
+    return { content: [{ type: "text", text: `Phase ${phaseId} reset to pending for retry.` }] };
+  }
+);
+
+// ── Tool: pipeline_skip_to ──
+server.tool(
+  "pipeline_skip_to",
+  "Skip to a specific phase, marking intermediate phases as skipped",
+  {
+    root: z.string().optional().describe("Project root path"),
+    phaseId: z.number().min(1).max(7).describe("Target phase ID to skip to"),
+  },
+  async ({ root: rootArg, phaseId }) => {
+    const root = resolveRoot(rootArg);
+    const data = readStatus(root);
+    if (!data) return { content: [{ type: "text", text: "No pipeline status file found." }] };
+    for (const phase of data.phases) {
+      if (phase.id < phaseId && (phase.status === 'pending' || phase.status === 'running')) phase.status = 'skipped';
+    }
+    data.currentPhase = phaseId;
+    writeStatusAndBroadcast(root, data);
+    return { content: [{ type: "text", text: `Skipped to Phase ${phaseId}.` }] };
+  }
+);
+
+// ── Tool: pipeline_manage_role ──
+server.tool(
+  "pipeline_manage_role",
+  "Manage pipeline roles: list, get, create, update, or delete role files",
+  {
+    root: z.string().optional().describe("Project root path"),
+    action: z.enum(['list', 'get', 'create', 'update', 'delete']).describe("Action to perform"),
+    name: z.string().optional().describe("Role name (filename without .md)"),
+    content: z.string().optional().describe("Role file content (for create/update)"),
+  },
+  async ({ root: rootArg, action, name, content }) => {
+    const root = resolveRoot(rootArg);
+    const rolesDir = path.join(root, '.claude/roles');
+
+    if (action === 'list') {
+      return { content: [{ type: "text", text: JSON.stringify(getRoles(root), null, 2) }] };
+    }
+    if (action === 'get') {
+      if (!name) return { content: [{ type: "text", text: "Missing role name." }] };
+      const p = path.join(rolesDir, `${name}.md`);
+      if (!fileExists(p)) return { content: [{ type: "text", text: `Role not found: ${name}` }] };
+      return { content: [{ type: "text", text: fs.readFileSync(p, 'utf-8') }] };
+    }
+    if (action === 'create') {
+      if (!name) return { content: [{ type: "text", text: "Missing role name." }] };
+      fs.mkdirSync(rolesDir, { recursive: true });
+      const p = path.join(rolesDir, `${name}.md`);
+      if (fileExists(p)) return { content: [{ type: "text", text: `Role already exists: ${name}` }] };
+      fs.writeFileSync(p, content || `# Role: ${name}\n\nDescribe responsibilities here.\n`);
+      return { content: [{ type: "text", text: `Role created: ${name}` }] };
+    }
+    if (action === 'update') {
+      if (!name || !content) return { content: [{ type: "text", text: "Missing name or content." }] };
+      fs.mkdirSync(rolesDir, { recursive: true });
+      fs.writeFileSync(path.join(rolesDir, `${name}.md`), content);
+      return { content: [{ type: "text", text: `Role updated: ${name}` }] };
+    }
+    if (action === 'delete') {
+      if (!name) return { content: [{ type: "text", text: "Missing role name." }] };
+      if (BUILT_IN_ROLES.has(name)) return { content: [{ type: "text", text: `Cannot delete built-in role: ${name}` }] };
+      const p = path.join(rolesDir, `${name}.md`);
+      if (fileExists(p)) fs.unlinkSync(p);
+      return { content: [{ type: "text", text: `Role deleted: ${name}` }] };
+    }
+    return { content: [{ type: "text", text: `Unknown action: ${action}` }] };
   }
 );
 
