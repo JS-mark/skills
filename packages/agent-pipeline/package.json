@@ -1,7 +1,7 @@
 {
   "name": "@aspect-mark/agent-pipeline",
   "type": "module",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Multi-Agent Collaborative Pipeline — Claude Code MCP Plugin",
   "author": "JS-mark <aspect_mark@163.com>",
   "license": "MIT",
@@ -24,13 +24,14 @@
   },
   "main": "./src/server.js",
   "bin": {
-    "agent-pipeline": "./src/cli.js"
+    "agent-pipeline": "./cli.js"
   },
   "files": [
     "README.md",
     "README.zh-CN.md",
-    "src",
-    "dashboard"
+    "cli.js",
+    "dashboard",
+    "src"
   ],
   "scripts": {
     "prepack": "cd ../pipeline-dashboard && pnpm build && cd .. && rm -rf agent-pipeline/dashboard && cp -r pipeline-dashboard/out agent-pipeline/dashboard"
