@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { PipelineTimeline } from '@/components/pipeline-timeline'
 import { StatsCards } from '@/components/stats-cards'
 import { usePipelineContext } from '@/hooks/pipeline-context'
@@ -108,12 +109,15 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 function DocCard({ doc }: { doc: import('@/lib/types').DocItem }) {
   return (
-    <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 hover:border-blue-500/30 transition-colors">
+    <Link
+      href={`/docs?selected=${encodeURIComponent(doc.path)}`}
+      className="block bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 hover:border-blue-500/30 transition-colors cursor-pointer"
+    >
       <span className={`text-[10px] px-2 py-0.5 rounded-md font-medium ${CATEGORY_COLORS[doc.category] || 'bg-slate-600 text-slate-300'}`}>
         {CATEGORY_LABELS[doc.category] || doc.category}
       </span>
       <h4 className="text-sm font-medium mt-2 truncate">{doc.name}</h4>
       <p className="text-[11px] text-slate-500 mt-1">{formatSizeSmall(doc.size)}</p>
-    </div>
+    </Link>
   )
 }

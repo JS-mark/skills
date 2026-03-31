@@ -17,10 +17,11 @@ const CATEGORY_LABELS: Record<string, { label: string, color: string }> = {
 
 interface DocViewerProps {
   docs: DocItem[]
+  initialSelected?: string
 }
 
-export function DocViewer({ docs }: DocViewerProps) {
-  const [selected, setSelected] = useState<string | null>(null)
+export function DocViewer({ docs, initialSelected }: DocViewerProps) {
+  const [selected, setSelected] = useState<string | null>(initialSelected || null)
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -43,7 +44,10 @@ export function DocViewer({ docs }: DocViewerProps) {
     if (docs.length > 0 && !selected) {
       loadDoc(docs[0].path)
     }
-  }, [docs, selected, loadDoc])
+    else if (initialSelected && selected === initialSelected && !content) {
+      loadDoc(initialSelected)
+    }
+  }, [docs, selected, initialSelected, content, loadDoc])
 
   if (!docs.length) {
     return <div className="p-8 text-center text-slate-500">暂无文档</div>

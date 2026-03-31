@@ -27,6 +27,8 @@ export const api = {
   getDocs: () => request<import('./types').DocItem[]>('/api/docs'),
   getDocContent: (path: string) => requestText(`/api/doc?path=${encodeURIComponent(path)}`),
   getFileContent: (path: string) => requestText(`/api/file?path=${encodeURIComponent(path)}`),
+  saveFileContent: (path: string, content: string) =>
+    request('/api/file', { method: 'PUT', body: JSON.stringify({ path, content }) }),
   getLogs: () => request<import('./types').LogItem[]>('/api/logs'),
   getLogContent: (file: string) => requestText(`/api/logs?file=${encodeURIComponent(file)}`),
 
@@ -79,6 +81,13 @@ export function createLogStream(file: string, onData: (chunk: string) => void): 
   if (typeof window === 'undefined')
     return null
   const es = new EventSource(`${API_BASE}/api/logs/stream?file=${encodeURIComponent(file)}`)
-  es.onmessage = e => onData(e.data)
+  es.onmessage = (e) => {
+    try {
+      onData(JSON.parse(e.data))
+    }
+    catch {
+      onData(e.data)
+    }
+  }
   return es
 }

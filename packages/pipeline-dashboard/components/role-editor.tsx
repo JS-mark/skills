@@ -93,7 +93,7 @@ export function RoleManager() {
     if (!newName.trim())
       return
     const filename = newName.trim().toLowerCase().replace(/\s+/g, '-')
-    const template = templates[filename] || `# Role: ${newName}\n\nDescribe this role's responsibilities here.\n`
+    const template = templates[filename] || `# 角色: ${newName}\n\n在此描述该角色的职责。\n`
     try {
       await api.createRole(filename, template)
       setShowCreate(false)

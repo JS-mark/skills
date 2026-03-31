@@ -43,6 +43,11 @@ export function usePipeline() {
     const ws = createWS((msg: WSMessage) => {
       if (msg.type === 'status') {
         setStatus(msg.data)
+        // Status changed — also refresh docs and logs
+        Promise.all([api.getDocs(), api.getLogs()]).then(([d, l]) => {
+          setDocs(d)
+          setLogs(l)
+        }).catch(() => {})
       }
       else {
         // For other message types, refetch all data

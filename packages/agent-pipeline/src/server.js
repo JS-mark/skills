@@ -447,10 +447,10 @@ function writeStatusAndBroadcast(root, data) {
 const BUILT_IN_ROLES = new Set(['pm', 'architect', 'ui-designer', 'fullstack', 'tester', 'reviewer']);
 
 const EXTRA_ROLE_TEMPLATES = {
-  'devops': `# Role: DevOps Engineer\n\nYou are a senior DevOps engineer responsible for CI/CD pipelines, infrastructure, and deployment.\n\n## Core Responsibilities\n- Set up CI/CD pipelines\n- Configure deployment environments\n- Write Dockerfiles and compose files\n- Manage infrastructure as code\n\n## Output\nAll output goes to \`docs/devops/\`, filename: \`feature-<name>.md\``,
-  'dba': `# Role: Database Administrator\n\nYou are a senior DBA responsible for database schema design, migrations, and optimization.\n\n## Core Responsibilities\n- Design database schemas\n- Write migration scripts\n- Optimize queries and indexes\n- Plan data backup strategies\n\n## Output\nAll output goes to \`docs/database/\`, filename: \`feature-<name>.md\``,
-  'security-auditor': `# Role: Security Auditor\n\nYou are a senior security engineer responsible for security review and vulnerability assessment.\n\n## Core Responsibilities\n- Review code for security vulnerabilities (OWASP Top 10)\n- Check authentication and authorization logic\n- Validate input sanitization\n- Assess dependency security\n\n## Output\nAll output goes to \`docs/security/\`, filename: \`feature-<name>.md\``,
-  'tech-writer': `# Role: Technical Writer\n\nYou are a senior technical writer responsible for user-facing documentation.\n\n## Core Responsibilities\n- Write API documentation\n- Create user guides and tutorials\n- Maintain README files\n- Document architecture decisions (ADRs)\n\n## Output\nAll output goes to \`docs/guides/\`, filename: \`feature-<name>.md\``,
+  'devops': `# 角色: DevOps 工程师\n\n你是一名资深 DevOps 工程师，负责 CI/CD 流水线、基础设施和部署。\n\n## 核心职责\n- 搭建 CI/CD 流水线\n- 配置部署环境\n- 编写 Dockerfile 和 compose 文件\n- 管理基础设施即代码 (IaC)\n\n## 产出\n所有产出输出到 \`docs/devops/\`，文件名: \`feature-<name>.md\``,
+  'dba': `# 角色: 数据库管理员\n\n你是一名资深 DBA，负责数据库 Schema 设计、迁移和性能优化。\n\n## 核心职责\n- 设计数据库 Schema\n- 编写迁移脚本\n- 优化查询和索引\n- 制定数据备份策略\n\n## 产出\n所有产出输出到 \`docs/database/\`，文件名: \`feature-<name>.md\``,
+  'security-auditor': `# 角色: 安全审计员\n\n你是一名资深安全工程师，负责安全审查和漏洞评估。\n\n## 核心职责\n- 审查代码安全漏洞 (OWASP Top 10)\n- 检查认证和授权逻辑\n- 验证输入校验与过滤\n- 评估依赖安全性\n\n## 产出\n所有产出输出到 \`docs/security/\`，文件名: \`feature-<name>.md\``,
+  'tech-writer': `# 角色: 技术文档工程师\n\n你是一名资深技术文档工程师，负责面向用户的文档编写。\n\n## 核心职责\n- 编写 API 文档\n- 创建用户指南和教程\n- 维护 README 文件\n- 记录架构决策 (ADR)\n\n## 产出\n所有产出输出到 \`docs/guides/\`，文件名: \`feature-<name>.md\``,
 };
 
 function getRoles(root) {
@@ -595,6 +595,23 @@ function startDashboard(root, port) {
       const abs = safePath(root, dp);
       if (!abs || !fileExists(abs)) { res.writeHead(404); res.end('not found'); return; }
       return textReply(res, fs.readFileSync(abs, 'utf-8'));
+    }
+
+    if (p === '/api/file' && req.method === 'PUT') {
+      const body = await readBody(req);
+      const fp = body.path;
+      const content = body.content;
+      if (!fp || typeof content !== 'string') { res.writeHead(400); res.end('missing path or content'); return; }
+      const abs = safePath(root, 'src', fp);
+      if (!abs) { res.writeHead(403); res.end('forbidden'); return; }
+      try {
+        const dir = path.dirname(abs);
+        if (!dirExists(dir)) fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(abs, content, 'utf-8');
+        return jsonReply(res, { ok: true });
+      } catch (e) {
+        return jsonReply(res, { error: e.message }, 500);
+      }
     }
 
     if (p === '/api/file') {
