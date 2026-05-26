@@ -3,6 +3,12 @@
   "buildCommand": "nuxt build",
   "outputDirectory": ".output",
   "installCommand": "pnpm install",
+  "build": {
+    "env": {
+      "NITRO_PRESET": "vercel",
+      "STORAGE_DRIVER": "vercelBlob"
+    }
+  },
   "crons": [
     {
       "path": "/api/sources/cron",

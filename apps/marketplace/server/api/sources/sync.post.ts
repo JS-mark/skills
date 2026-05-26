@@ -1,6 +1,3 @@
-import type { MarketSource } from '~/types'
-import { readFileSync, writeFileSync } from 'node:fs'
-import { resolve } from 'node:path'
 import { fetchAwesomeMcpList } from '~~/server/utils/awesome-list'
 import { fetchGitMcps, fetchGitSkills } from '~~/server/utils/git-source'
 import { fetchMcpRegistry, fetchSkillRegistry, mcpRegistryItemToMcpServer, skillRegistryItemToSkill } from '~~/server/utils/registry'
@@ -10,15 +7,14 @@ export default defineEventHandler(async (event) => {
   if (!sourceId)
     throw createError({ statusCode: 400, statusMessage: 'Missing sourceId' })
 
-  const sourcesFile = resolve(process.cwd(), 'content/sources.json')
-  const sources: MarketSource[] = JSON.parse(readFileSync(sourcesFile, 'utf-8'))
+  const sources = await getSourcesList()
   const source = sources.find(s => s.id === sourceId)
 
   if (!source)
     throw createError({ statusCode: 404, statusMessage: 'Source not found' })
 
   source.status = 'syncing'
-  writeFileSync(sourcesFile, JSON.stringify(sources, null, 2))
+  await saveSourcesList(sources)
 
   try {
     let skillCount = 0
@@ -29,14 +25,14 @@ export default defineEventHandler(async (event) => {
         const items = await fetchSkillRegistry(source.url)
         const skills = items.map(i => skillRegistryItemToSkill(i, source.id))
         for (const skill of skills)
-          writeFileSync(resolve(process.cwd(), `content/skills/${skill.id}.json`), JSON.stringify(skill, null, 2))
+          await saveSkill(skill)
         skillCount = skills.length
       }
       else {
         const items = await fetchMcpRegistry(source.url)
         const mcps = items.map(i => mcpRegistryItemToMcpServer(i, source.id))
         for (const mcp of mcps)
-          writeFileSync(resolve(process.cwd(), `content/mcps/${mcp.id}.json`), JSON.stringify(mcp, null, 2))
+          await saveMcp(mcp)
         mcpCount = mcps.length
       }
     }
@@ -46,7 +42,7 @@ export default defineEventHandler(async (event) => {
       if (source.discovery?.skills) {
         const skills = await fetchGitSkills(source.url, branch, source.discovery.skills, source.id)
         for (const skill of skills)
-          writeFileSync(resolve(process.cwd(), `content/skills/${skill.id}.json`), JSON.stringify(skill, null, 2))
+          await saveSkill(skill)
         skillCount = skills.length
       }
 
@@ -56,7 +52,7 @@ export default defineEventHandler(async (event) => {
           ? await fetchAwesomeMcpList(source.url, branch, source.discovery.mcps, source.id)
           : await fetchGitMcps(source.url, branch, source.discovery.mcps, source.id)
         for (const mcp of mcps)
-          writeFileSync(resolve(process.cwd(), `content/mcps/${mcp.id}.json`), JSON.stringify(mcp, null, 2))
+          await saveMcp(mcp)
         mcpCount = mcps.length
       }
     }
@@ -64,13 +60,13 @@ export default defineEventHandler(async (event) => {
     source.status = 'active'
     source.lastSynced = new Date().toISOString()
     source.itemCount = skillCount + mcpCount
-    writeFileSync(sourcesFile, JSON.stringify(sources, null, 2))
+    await saveSourcesList(sources)
 
     return { success: true, skills: skillCount, mcps: mcpCount }
   }
   catch (error: any) {
     source.status = 'error'
-    writeFileSync(sourcesFile, JSON.stringify(sources, null, 2))
+    await saveSourcesList(sources)
     throw createError({ statusCode: 500, statusMessage: `Sync failed: ${error.message}` })
   }
 })

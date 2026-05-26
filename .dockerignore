@@ -1,0 +1,14 @@
+**/node_modules
+**/.nuxt
+**/.output
+**/.git
+**/.github
+**/.vscode
+**/dist
+**/*.log
+**/.env
+**/.env.*
+**/.DS_Store
+packages/docs
+packages/pipeline-dashboard
+skills

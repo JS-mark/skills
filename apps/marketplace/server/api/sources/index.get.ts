@@ -1,5 +1,3 @@
-import { getSources } from '~~/server/utils/data'
-
-export default defineEventHandler(() => {
-  return getSources()
+export default defineEventHandler(async () => {
+  return await getSourcesList()
 })

@@ -1,5 +1,3 @@
-import { writeFileSync } from 'node:fs'
-import { resolve } from 'node:path'
 import type { McpServer } from '~/types'
 
 export default defineEventHandler(async (event) => {
@@ -34,8 +32,6 @@ export default defineEventHandler(async (event) => {
     updatedAt: new Date().toISOString(),
   }
 
-  const filePath = resolve(process.cwd(), `content/mcps/${id}.json`)
-  writeFileSync(filePath, JSON.stringify(mcp, null, 2))
-
+  await saveMcp(mcp)
   return mcp
 })

@@ -1,10 +1,5 @@
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
-import type { MarketSource } from '~/types'
-
 export default defineEventHandler(async () => {
-  const sourcesFile = resolve(process.cwd(), 'content/sources.json')
-  const sources: MarketSource[] = JSON.parse(readFileSync(sourcesFile, 'utf-8'))
+  const sources = await getSourcesList()
 
   const results = []
   for (const source of sources.filter(s => s.status !== 'syncing')) {

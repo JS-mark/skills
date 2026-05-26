@@ -1,17 +1,4 @@
-import { readFileSync, readdirSync, existsSync } from 'node:fs'
-import { join, resolve } from 'node:path'
-import type { MarketSource, McpServer, PaginatedResponse, SearchQuery, Skill } from '~/types'
-
-const contentDir = resolve(process.cwd(), 'content')
-
-function readJsonDir<T>(subdir: string): T[] {
-  const dir = join(contentDir, subdir)
-  if (!existsSync(dir))
-    return []
-  return readdirSync(dir)
-    .filter(f => f.endsWith('.json'))
-    .map(f => JSON.parse(readFileSync(join(dir, f), 'utf-8')) as T)
-}
+import type { McpServer, PaginatedResponse, SearchQuery, Skill } from '~/types'
 
 function deduplicateByName<T extends { name: string, downloads: number }>(items: T[]): T[] {
   const map = new Map<string, T>()
@@ -23,29 +10,14 @@ function deduplicateByName<T extends { name: string, downloads: number }>(items:
   return [...map.values()]
 }
 
-export function getAllSkills(): Skill[] {
-  const all = readJsonDir<Skill>('skills')
+export async function fetchAllSkills(): Promise<Skill[]> {
+  const all = await getAllSkills()
   return deduplicateByName(all)
 }
 
-export function getAllMcps(): McpServer[] {
-  const all = readJsonDir<McpServer>('mcps')
+export async function fetchAllMcps(): Promise<McpServer[]> {
+  const all = await getAllMcps()
   return deduplicateByName(all)
-}
-
-export function getSkillById(id: string): Skill | undefined {
-  return getAllSkills().find(s => s.id === id)
-}
-
-export function getMcpById(id: string): McpServer | undefined {
-  return getAllMcps().find(m => m.id === id)
-}
-
-export function getSources(): MarketSource[] {
-  const file = join(contentDir, 'sources.json')
-  if (!existsSync(file))
-    return []
-  return JSON.parse(readFileSync(file, 'utf-8'))
 }
 
 export function paginate<T>(items: T[], query: SearchQuery): PaginatedResponse<T> {

@@ -1,5 +1,3 @@
-import { readFileSync, writeFileSync } from 'node:fs'
-import { resolve } from 'node:path'
 import type { MarketSource } from '~/types'
 
 export default defineEventHandler(async (event) => {
@@ -11,8 +9,7 @@ export default defineEventHandler(async (event) => {
   if (body.type === 'git' && !body.discovery)
     throw createError({ statusCode: 400, statusMessage: 'Git sources require discovery patterns' })
 
-  const sourcesFile = resolve(process.cwd(), 'content/sources.json')
-  const sources: MarketSource[] = JSON.parse(readFileSync(sourcesFile, 'utf-8'))
+  const sources = await getSourcesList()
 
   const newSource: MarketSource = {
     id: body.name.toLowerCase().replace(/\s+/g, '-'),
@@ -30,7 +27,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 409, statusMessage: 'Source with this name already exists' })
 
   sources.push(newSource)
-  writeFileSync(sourcesFile, JSON.stringify(sources, null, 2))
+  await saveSourcesList(sources)
 
   return newSource
 })

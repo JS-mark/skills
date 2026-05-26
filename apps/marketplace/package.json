@@ -15,6 +15,7 @@
     "@libsql/client": "^0.17.3",
     "@nuxt/content": "^3.14.0",
     "@nuxt/ui": "^4.8.0",
+    "@vercel/blob": "^2.4.0",
     "@vueuse/nuxt": "^14.3.0",
     "marked": "^18.0.4",
     "nuxt": "^4.4.6",

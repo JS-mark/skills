@@ -1,5 +1,3 @@
-import { writeFileSync } from 'node:fs'
-import { resolve } from 'node:path'
 import type { Skill } from '~/types'
 
 export default defineEventHandler(async (event) => {
@@ -28,8 +26,6 @@ export default defineEventHandler(async (event) => {
     updatedAt: new Date().toISOString(),
   }
 
-  const filePath = resolve(process.cwd(), `content/skills/${id}.json`)
-  writeFileSync(filePath, JSON.stringify(skill, null, 2))
-
+  await saveSkill(skill)
   return skill
 })

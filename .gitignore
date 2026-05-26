@@ -37,3 +37,4 @@ packages/docs/.vitepress/cache/
 
 packages/pipeline-dashboard/out/
 packages/pipeline-dashboard/.next/
+apps/marketplace/.claude/settings.local.json

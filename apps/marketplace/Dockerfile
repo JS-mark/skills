@@ -1,11 +1,11 @@
 # --- Base ---
-FROM node:22-alpine AS base
+FROM node:22-slim AS base
 RUN corepack enable && corepack prepare pnpm@10.6.5 --activate
 WORKDIR /app
 
 # --- Dependencies ---
 FROM base AS deps
-RUN apk add --no-cache python3 make g++
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
 
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/marketplace/package.json apps/marketplace/package.json
@@ -22,17 +22,19 @@ WORKDIR /app/apps/marketplace
 RUN pnpm build
 
 # --- Runtime ---
-FROM node:22-alpine AS runtime
+FROM node:22-slim AS runtime
 WORKDIR /app
 
-RUN apk add --no-cache curl cronie
+RUN apt-get update && apt-get install -y --no-install-recommends curl cron && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app/apps/marketplace/.output .output/
 COPY --from=build /app/apps/marketplace/content content.default/
 COPY apps/marketplace/docker/entrypoint.sh /entrypoint.sh
-COPY apps/marketplace/docker/crontab /etc/crontabs/root
+COPY apps/marketplace/docker/crontab /etc/cron.d/skillforge-sync
 
-RUN chmod +x /entrypoint.sh
+RUN chmod +x /entrypoint.sh && \
+    chmod 0644 /etc/cron.d/skillforge-sync && \
+    crontab /etc/cron.d/skillforge-sync
 
 ENV HOST=0.0.0.0
 ENV PORT=3000

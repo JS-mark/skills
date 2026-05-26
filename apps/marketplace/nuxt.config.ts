@@ -1,3 +1,9 @@
+import process from 'node:process'
+
+const storageData = process.env.STORAGE_DRIVER === 'vercelBlob'
+  ? { driver: 'vercelBlob' as const, token: process.env.BLOB_READ_WRITE_TOKEN }
+  : { driver: 'fs' as const, base: '.data/content' }
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: [
@@ -12,6 +18,15 @@ export default defineNuxtConfig({
 
   nitro: {
     preset: process.env.NITRO_PRESET || 'node-server',
+    storage: {
+      data: storageData,
+    },
+    devStorage: {
+      data: {
+        driver: 'fs',
+        base: './content',
+      },
+    },
   },
 
   vite: {
