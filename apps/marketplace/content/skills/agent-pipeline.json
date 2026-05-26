@@ -1,0 +1,18 @@
+{
+  "id": "agent-pipeline",
+  "name": "agent-pipeline",
+  "description": "Multi-Agent Collaborative Pipeline for Claude Code — orchestrates 7 development phases with 6 specialized AI roles",
+  "version": "2.0.0",
+  "author": "JS-mark",
+  "tags": ["multi-agent", "pipeline", "mcp", "development-workflow", "automation"],
+  "category": "development",
+  "allowedTools": ["Bash", "Read", "Write", "Agent"],
+  "triggers": ["agent", "pipeline", "multi-agent"],
+  "source": "local",
+  "repository": "https://github.com/JS-mark/skills",
+  "installCommand": "claude install-skill https://github.com/JS-mark/skills/tree/main/skills/agent-pipeline",
+  "downloads": 128,
+  "rating": 4.8,
+  "createdAt": "2025-03-15T00:00:00Z",
+  "updatedAt": "2025-05-20T00:00:00Z"
+}

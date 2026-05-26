@@ -1,0 +1,55 @@
+[
+  {
+    "id": "local",
+    "type": "git",
+    "name": "Official Skills",
+    "url": "https://github.com/JS-mark/skills",
+    "branch": "main",
+    "discovery": {
+      "skills": "skills/*/SKILL.md",
+      "mcps": "packages/*/package.json"
+    },
+    "lastSynced": "2026-05-26T11:08:11.036Z",
+    "itemCount": 3,
+    "status": "active"
+  },
+  {
+    "id": "mcp-official",
+    "type": "git",
+    "name": "MCP Official Servers",
+    "url": "https://github.com/modelcontextprotocol/servers",
+    "branch": "main",
+    "discovery": {
+      "mcps": "src/*/package.json"
+    },
+    "itemCount": 4,
+    "status": "active",
+    "lastSynced": "2026-05-26T11:42:14.207Z"
+  },
+  {
+    "id": "awesome-mcp-servers",
+    "type": "git",
+    "name": "Awesome MCP Servers",
+    "url": "https://github.com/punkpeye/awesome-mcp-servers",
+    "branch": "main",
+    "discovery": {
+      "mcps": "README.md"
+    },
+    "itemCount": 2229,
+    "status": "active",
+    "lastSynced": "2026-05-26T12:06:15.245Z"
+  },
+  {
+    "id": "awesome-design-skills",
+    "type": "git",
+    "name": "Awesome Design Skills",
+    "url": "https://github.com/bergside/awesome-design-skills",
+    "branch": "main",
+    "discovery": {
+      "skills": "skills/*/SKILL.md"
+    },
+    "itemCount": 12,
+    "status": "active",
+    "lastSynced": "2026-05-26T11:58:24.164Z"
+  }
+]

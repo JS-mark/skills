@@ -1,0 +1,23 @@
+{
+  "name": "iconfont-downloader",
+  "description": "This skill should be used when the user asks to \"下载图标\", \"搜索图标\",",
+  "version": "0.1.0",
+  "author": "",
+  "tags": [],
+  "category": "other",
+  "allowedTools": [
+    "Bash",
+    "Read",
+    "Write",
+    "AskUserQuestion"
+  ],
+  "id": "local--iconfont-downloader",
+  "source": "git",
+  "sourceId": "local",
+  "repository": "https://github.com/JS-mark/skills/tree/main/skills/iconfont-downloader",
+  "installCommand": "claude install-skill https://github.com/JS-mark/skills/tree/main/skills/iconfont-downloader",
+  "downloads": 0,
+  "rating": 0,
+  "createdAt": "2026-05-26T11:08:06.866Z",
+  "updatedAt": "2026-05-26T11:08:06.866Z"
+}

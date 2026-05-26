@@ -1,0 +1,12 @@
+node_modules
+.nuxt
+.output
+dist
+.env
+
+# Synced external source data (regenerated via /sources sync)
+content/mcps/mcp-official--*
+content/mcps/awesome-mcp-servers--*
+content/skills/mcp-official--*
+content/skills/awesome-mcp-servers--*
+content/skills/awesome-design-skills--*

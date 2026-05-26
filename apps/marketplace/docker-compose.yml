@@ -1,0 +1,21 @@
+services:
+  app:
+    build:
+      context: ../../
+      dockerfile: apps/marketplace/Dockerfile
+    container_name: skillforge
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data/content:/app/content
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3000
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/sources"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

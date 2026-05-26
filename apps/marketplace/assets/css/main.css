@@ -1,0 +1,109 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+@source "../../components/**/*.vue";
+@source "../../pages/**/*.vue";
+@source "../../app.vue";
+
+@theme {
+  --color-surface: initial;
+  --color-surface-1: initial;
+  --color-surface-2: initial;
+  --color-surface-3: initial;
+  --color-border: initial;
+  --color-border-hover: initial;
+  --color-text-primary: initial;
+  --color-text-secondary: initial;
+  --color-text-tertiary: initial;
+  --color-accent: initial;
+  --color-accent-soft: initial;
+  --color-glow: initial;
+  --font-display: "Geist", system-ui, -apple-system, sans-serif;
+  --font-body: "Geist", system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono", "SF Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  :root {
+    --color-surface: #ffffff;
+    --color-surface-1: #f8f9fa;
+    --color-surface-2: #f1f3f5;
+    --color-surface-3: #e9ecef;
+    --color-border: #e2e5ea;
+    --color-border-hover: #ced4da;
+    --color-text-primary: #1a1d23;
+    --color-text-secondary: #5c6370;
+    --color-text-tertiary: #8b92a8;
+    --color-accent: #4f8fff;
+    --color-accent-soft: rgba(79, 143, 255, 0.08);
+    --color-glow: rgba(79, 143, 255, 0.15);
+  }
+
+  .dark {
+    --color-surface: #08090c;
+    --color-surface-1: #0d0f14;
+    --color-surface-2: #12151c;
+    --color-surface-3: #181c25;
+    --color-border: #1e2230;
+    --color-border-hover: #2a3040;
+    --color-text-primary: #e8eaf0;
+    --color-text-secondary: #8b92a8;
+    --color-text-tertiary: #505872;
+    --color-accent: #4f8fff;
+    --color-accent-soft: rgba(79, 143, 255, 0.08);
+    --color-glow: rgba(79, 143, 255, 0.15);
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html {
+  background: var(--color-surface);
+}
+
+body {
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}
+
+a { text-decoration: none; color: inherit; }
+
+::selection {
+  background: rgba(79, 143, 255, 0.3);
+  color: #fff;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-border-hover); }
+
+/* Animations */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }

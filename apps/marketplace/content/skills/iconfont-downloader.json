@@ -1,0 +1,18 @@
+{
+  "id": "iconfont-downloader",
+  "name": "iconfont-downloader",
+  "description": "搜索和下载 iconfont.cn 上的 SVG 图标资源，支持批量下载和自动集成到项目",
+  "version": "1.0.0",
+  "author": "JS-mark",
+  "tags": ["icon", "svg", "iconfont", "download", "design"],
+  "category": "design",
+  "allowedTools": ["Bash", "Read", "Write", "AskUserQuestion"],
+  "triggers": ["下载图标", "搜索图标", "iconfont", "download icon"],
+  "source": "local",
+  "repository": "https://github.com/JS-mark/skills",
+  "installCommand": "claude install-skill https://github.com/JS-mark/skills/tree/main/skills/iconfont-downloader",
+  "downloads": 56,
+  "rating": 4.5,
+  "createdAt": "2025-04-01T00:00:00Z",
+  "updatedAt": "2025-05-10T00:00:00Z"
+}

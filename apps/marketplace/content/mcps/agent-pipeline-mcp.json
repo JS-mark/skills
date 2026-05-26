@@ -1,0 +1,34 @@
+{
+  "id": "agent-pipeline-mcp",
+  "name": "@aspect-mark/agent-pipeline",
+  "description": "MCP server providing pipeline orchestration tools — manage multi-agent workflows with status tracking, role prompts, and a web dashboard",
+  "version": "2.2.0",
+  "vendor": "JS-mark",
+  "license": "MIT",
+  "sourceUrl": "https://github.com/JS-mark/skills/tree/main/packages/agent-pipeline",
+  "homepage": "https://github.com/JS-mark/skills",
+  "tags": ["pipeline", "multi-agent", "orchestration", "dashboard"],
+  "category": "devtools",
+  "runtime": "node",
+  "source": "local",
+  "npmPackage": "@aspect-mark/agent-pipeline",
+  "tools": [
+    { "name": "pipeline_status", "description": "Get current pipeline status with phase progress" },
+    { "name": "pipeline_update_phase", "description": "Update the status of a pipeline phase or subtask" },
+    { "name": "pipeline_init_project", "description": "Initialize multi-agent workflow in a project" },
+    { "name": "pipeline_dashboard", "description": "Start or stop the web monitoring dashboard" },
+    { "name": "pipeline_role_prompt", "description": "Get system prompt content for a specific role" },
+    { "name": "pipeline_init_status", "description": "Create initial pipeline status JSON" },
+    { "name": "pipeline_finalize", "description": "Mark pipeline as done or failed" }
+  ],
+  "resources": [],
+  "prompts": [],
+  "config": {
+    "command": "npx",
+    "args": ["-y", "@aspect-mark/agent-pipeline"]
+  },
+  "downloads": 95,
+  "rating": 4.7,
+  "createdAt": "2025-03-20T00:00:00Z",
+  "updatedAt": "2025-05-22T00:00:00Z"
+}

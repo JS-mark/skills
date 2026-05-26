@@ -26,7 +26,10 @@
     "release": "bumpp",
     "docs:dev": "pnpm --filter @aspect-mark/docs dev",
     "docs:build": "pnpm --filter @aspect-mark/docs build",
-    "docs:preview": "pnpm --filter @aspect-mark/docs preview"
+    "docs:preview": "pnpm --filter @aspect-mark/docs preview",
+    "market:dev": "pnpm --filter @aspect-mark/marketplace dev",
+    "market:build": "pnpm --filter @aspect-mark/marketplace build",
+    "market:preview": "pnpm --filter @aspect-mark/marketplace preview"
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:",

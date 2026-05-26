@@ -5,5 +5,10 @@ export default antfu({
     'skills/**',
     'packages/agent-pipeline/src/**',
     'packages/docs/**',
+    'apps/marketplace/.nuxt/**',
+    'apps/marketplace/.output/**',
   ],
+  rules: {
+    'style/eol-last': 'off'
+  },
 })

@@ -1,0 +1,12 @@
+{
+  "framework": "nuxtjs",
+  "buildCommand": "nuxt build",
+  "outputDirectory": ".output",
+  "installCommand": "pnpm install",
+  "crons": [
+    {
+      "path": "/api/sources/cron",
+      "schedule": "0 */6 * * *"
+    }
+  ]
+}
