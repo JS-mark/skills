@@ -1,8 +1,9 @@
 {
-  "framework": "nuxtjs",
-  "buildCommand": "nuxt build",
-  "outputDirectory": ".output",
-  "installCommand": "pnpm install",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "buildCommand": "cd ../.. && pnpm --filter @aspect-mark/marketplace... build",
+  "outputDirectory": ".vercel/output",
   "build": {
     "env": {
       "NITRO_PRESET": "vercel",
@@ -12,7 +13,7 @@
   "crons": [
     {
       "path": "/api/sources/cron",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 3 * * *"
     }
   ]
 }
