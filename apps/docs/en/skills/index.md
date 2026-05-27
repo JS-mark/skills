@@ -7,6 +7,7 @@ Skills are Markdown files that extend Claude Code capabilities. Each Skill can b
 | Skill | Description | Trigger |
 |-------|-------------|---------|
 | [agent-pipeline](./agent-pipeline) | Multi-Agent Collaborative Pipeline | `/agent` |
+| [github-trend-analyzer](./github-trend-analyzer) | GitHub trend analysis & project blueprint | Natural language |
 | [drama-writer](./drama-writer) | Short Drama Screenwriting Assistant | `/drama` |
 | [novel-writer](./novel-writer) | Novel Writing Assistant | `/write` |
 | [feature-planner](./feature-planner) | Feature Development Planner | `/plan-feature` |
@@ -20,6 +21,10 @@ Skills are Markdown files that extend Claude Code capabilities. Each Skill can b
 - **[agent-pipeline](./agent-pipeline)** — Automated full software development lifecycle
 - **[feature-planner](./feature-planner)** — Requirement analysis and task breakdown
 - **[i18n-helper](./i18n-helper)** — Code internationalization
+
+### Research & Intel
+
+- **[github-trend-analyzer](./github-trend-analyzer)** — GitHub project trends + new-project blueprint
 
 ### Creative Tools
 

@@ -21,6 +21,10 @@ features:
     title: 多 Agent 协作流水线
     details: 7 阶段、6 个 AI 角色自动完成从需求到测试的完整开发流程，Phase 2 并行执行，支持自动修复循环。
     link: /skills/agent-pipeline
+  - icon: 📊
+    title: GitHub 趋势分析
+    details: 三类样本对比（新生 / 互动高 / Star 高），输出新项目立项 Blueprint，可一键打包邮件发送。
+    link: /skills/github-trend-analyzer
   - icon: 🎬
     title: 短剧剧本创作
     details: 竖屏短剧和横屏微短剧全流程创作，8 大题材模板，专业剧本格式，一集一钩。
@@ -41,4 +45,8 @@ features:
     title: Iconfont 图标下载
     details: 从 iconfont.cn 搜索下载 SVG 图标，支持多种登录方式和批量下载。
     link: /skills/iconfont-downloader
+  - icon: 🛒
+    title: SkillForge 市场
+    details: Nuxt 3 全栈应用，发现、搜索、分享 Skills 与 MCP 服务器，支持 Vercel SSR 与 Docker 自托管。
+    link: /apps/marketplace
 ---

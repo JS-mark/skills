@@ -21,6 +21,10 @@ features:
     title: Multi-Agent Pipeline
     details: 7-phase, 6 AI-role automated dev workflow from requirements to tested code, with parallel Phase 2 and auto fix-test loop.
     link: /en/skills/agent-pipeline
+  - icon: 📊
+    title: GitHub Trend Analyzer
+    details: Three-bucket sampling (new / engaged / starred), turn the findings into a launchable Project Blueprint, optionally zip-and-email it.
+    link: /en/skills/github-trend-analyzer
   - icon: 🎬
     title: Drama Writer
     details: Full-cycle short drama screenwriting for vertical and horizontal formats, 8 genre templates, professional script format.
@@ -41,4 +45,8 @@ features:
     title: Iconfont Downloader
     details: Search and download SVG icons from iconfont.cn with multiple login methods and batch download.
     link: /en/skills/iconfont-downloader
+  - icon: 🛒
+    title: SkillForge Marketplace
+    details: A Nuxt 3 fullstack app to discover, search, and share Skills & MCP servers — Vercel SSR or self-hosted via Docker.
+    link: /en/apps/marketplace
 ---

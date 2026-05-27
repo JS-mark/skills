@@ -7,6 +7,7 @@ Skills 是扩展 Claude Code 能力的 Markdown 文件。每个 Skill 可以通�
 | Skill | 描述 | 触发方式 |
 |-------|------|----------|
 | [agent-pipeline](./agent-pipeline) | 多 Agent 协作开发流水线 | `/agent` |
+| [github-trend-analyzer](./github-trend-analyzer) | GitHub 趋势分析与新项目设计 | 自然语言 |
 | [drama-writer](./drama-writer) | 短剧剧本创作助手 | `/drama` |
 | [novel-writer](./novel-writer) | 长篇小说创作助手 | `/write` |
 | [feature-planner](./feature-planner) | 功能开发规划助手 | `/plan-feature` |
@@ -20,6 +21,10 @@ Skills 是扩展 Claude Code 能力的 Markdown 文件。每个 Skill 可以通�
 - **[agent-pipeline](./agent-pipeline)** — 自动化软件开发全流程
 - **[feature-planner](./feature-planner)** — 功能需求分析和任务拆解
 - **[i18n-helper](./i18n-helper)** — 代码多语言国际化
+
+### 调研与情报
+
+- **[github-trend-analyzer](./github-trend-analyzer)** — GitHub 项目趋势分析 + 新项目 Blueprint
 
 ### 创作工具
 

@@ -9,6 +9,7 @@ export const en = defineConfig({
       { text: 'Guide', link: '/en/guide/introduction', activeMatch: '/en/guide/' },
       { text: 'Skills', link: '/en/skills/', activeMatch: '/en/skills/' },
       { text: 'Packages', link: '/en/packages/', activeMatch: '/en/packages/' },
+      { text: 'Apps', link: '/en/apps/', activeMatch: '/en/apps/' },
       { text: 'Changelog', link: '/en/changelog' },
     ],
 
@@ -29,6 +30,7 @@ export const en = defineConfig({
           items: [
             { text: 'Overview', link: '/en/skills/' },
             { text: 'agent-pipeline', link: '/en/skills/agent-pipeline' },
+            { text: 'github-trend-analyzer', link: '/en/skills/github-trend-analyzer' },
             { text: 'iconfont-downloader', link: '/en/skills/iconfont-downloader' },
             { text: 'drama-writer', link: '/en/skills/drama-writer' },
             { text: 'feature-planner', link: '/en/skills/feature-planner' },
@@ -43,7 +45,18 @@ export const en = defineConfig({
           items: [
             { text: 'Overview', link: '/en/packages/' },
             { text: '@aspect-mark/agent-pipeline', link: '/en/packages/agent-pipeline' },
+            { text: '@aspect-mark/pipeline-dashboard', link: '/en/packages/pipeline-dashboard' },
             { text: '@aspect-mark/shared', link: '/en/packages/shared' },
+          ],
+        },
+      ],
+      '/en/apps/': [
+        {
+          text: 'Apps',
+          items: [
+            { text: 'Overview', link: '/en/apps/' },
+            { text: 'marketplace', link: '/en/apps/marketplace' },
+            { text: 'docs', link: '/en/apps/docs' },
           ],
         },
       ],

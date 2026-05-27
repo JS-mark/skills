@@ -1,81 +1,109 @@
 # Project Structure
 
-## Top-Level Directory
+## Top-level layout
 
 ```
 skills/
 ├── skills/          → Claude Code Skills (pure Markdown, not in pnpm workspace)
-├── packages/        → TypeScript packages (pnpm workspace)
-├── scripts/         → Development scripts
-├── docs/            → VitePress documentation site
+├── packages/        → Reusable TypeScript libraries (pnpm workspace)
+├── apps/            → Deployable applications & sites (pnpm workspace)
+├── scripts/         → Dev scripts (gen-skill / update-plugin)
 ├── .github/         → GitHub Actions workflows
-├── package.json     → Root configuration
+├── .claude/         → Project-level Claude Code config (skill symlinks live here)
+├── package.json     → Root config (provides docs:dev / market:dev aliases)
 ├── pnpm-workspace.yaml
 ├── eslint.config.ts
 ├── vitest.config.ts
 └── tsconfig.json
 ```
 
-## Skills Directory
+## Skills
 
-Each Skill is a standalone directory containing Markdown instruction files and optional reference documents:
+Each Skill is a standalone directory of Markdown instructions plus optional references:
 
 ```
 skills/
-├── agent-pipeline/
-│   ├── SKILL.md              # Skill instruction definition
-│   ├── references/           # Reference documents
-│   └── README.md
-├── drama-writer/
-│   ├── commands/             # Slash commands
-│   │   └── drama.md
-│   ├── skills/
-│   │   └── drama-writer/
-│   │       ├── SKILL.md
-│   │       └── references/
-│   └── README.md
-├── feature-planner/
-├── i18n-helper/
-├── iconfont-downloader/
-└── novel-writer/
+├── agent-pipeline/         # Multi-Agent Collaborative Pipeline
+├── github-trend-analyzer/  # GitHub trend analysis + project blueprint
+├── drama-writer/           # Short drama screenwriting
+├── novel-writer/           # Novel writing
+├── feature-planner/        # Feature planning
+├── i18n-helper/            # Internationalization
+└── iconfont-downloader/    # Iconfont icon downloader
+```
+
+Minimal layout (e.g. `github-trend-analyzer`):
+
+```
+skills/github-trend-analyzer/
+├── SKILL.md            # YAML frontmatter + Markdown instructions
+└── references/         # Reference docs / helper scripts
+    ├── github-api.md
+    ├── analysis-template.md
+    └── send-report.py
 ```
 
 ::: tip
-The `skills/` directory is **not part of** the pnpm workspace — they are pure Markdown files that don't need building.
+`skills/` is **not part of** the pnpm workspace — pure Markdown, no build step. Symlink an entry under `.claude/skills/` to make a repo-local skill instantly available in Claude Code.
 :::
 
-## Packages Directory
+## Packages
 
-TypeScript packages managed via pnpm workspace:
+Reusable TypeScript libraries managed via pnpm workspace:
 
 ```
 packages/
-├── agent-pipeline/
-│   ├── package.json          # @aspect-mark/agent-pipeline
-│   └── src/
-│       ├── server.js         # MCP Server implementation
-│       └── cli.js            # CLI entry point
-└── shared/
-    ├── package.json          # @aspect-mark/shared
+├── agent-pipeline/             # @aspect-mark/agent-pipeline
+│   ├── src/
+│   │   ├── server.js           # MCP Server implementation
+│   │   └── cli.js              # CLI entry
+│   └── dashboard/              # Bundled pipeline-dashboard static export
+├── pipeline-dashboard/         # @aspect-mark/pipeline-dashboard (private)
+│   ├── app/                    # Next.js 15 App Router
+│   ├── components/
+│   └── next.config.ts
+└── shared/                     # @aspect-mark/shared
     ├── src/
-    │   └── index.ts          # Utility functions
     ├── test/
-    │   └── index.test.ts
-    └── tsdown.config.ts      # Build configuration
+    └── tsdown.config.ts
 ```
 
-## Configuration Files
+| Package | Role |
+|---------|------|
+| `agent-pipeline` | MCP server, invoked via `npx` (published to npm) |
+| `pipeline-dashboard` | Web monitoring UI for agent-pipeline (private; copied into agent-pipeline at build time) |
+| `shared` | Shared utility functions (tsdown emits ESM + CJS + dts) |
 
-| File | Description |
-|------|-------------|
-| `pnpm-workspace.yaml` | Defines workspace scope and catalog dependency versions |
-| `eslint.config.ts` | ESLint config (using `@antfu/eslint-config`) |
+## Apps
+
+End-user-facing applications & sites:
+
+```
+apps/
+├── docs/                  # @aspect-mark/docs (VitePress 1.x, GitHub Pages)
+└── marketplace/           # @aspect-mark/marketplace (Nuxt 3, Vercel / Docker)
+```
+
+| App | Deploy target | Description |
+|-----|---------------|-------------|
+| `docs` | GitHub Pages | This documentation site, bilingual |
+| `marketplace` | Vercel SSR / Docker | SkillForge — Skill & MCP marketplace |
+
+## Configuration files
+
+| File | Purpose |
+|------|---------|
+| `pnpm-workspace.yaml` | Workspace scope (`packages/*` + `apps/*`) and dependency catalog |
+| `eslint.config.ts` | ESLint config (`@antfu/eslint-config`) |
 | `vitest.config.ts` | Vitest test config |
 | `tsconfig.json` | TypeScript config |
 | `.npmrc` | pnpm config |
+| `.gitignore` | Ignores `apps/docs/.vitepress/{dist,cache}` and other build artifacts |
 
-## Code Style
+## Code style
 
-- Uses [@antfu/eslint-config](https://github.com/antfu/eslint-config), no Prettier needed
-- Follows [Conventional Commits](https://www.conventionalcommits.org/) convention
-- `skills/` directory is excluded from linting
+- ESLint via [@antfu/eslint-config](https://github.com/antfu/eslint-config) — no Prettier
+- [Conventional Commits](https://www.conventionalcommits.org/) for commit messages
+- `skills/**` and `apps/docs/**` are excluded from linting
+- All package names use the `@aspect-mark/` scope
+- Shared devDependencies referenced via `catalog:`

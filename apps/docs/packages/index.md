@@ -1,13 +1,18 @@
 # Packages 总览
 
-Skills monorepo 中的 TypeScript 工具包，通过 pnpm workspace 管理，发布到 npm。
+Skills monorepo 中的 TypeScript 工具包，通过 pnpm workspace 管理。可独立发布到 npm 的会标注 `npm`，仅服务于 monorepo 内部的会标注 `私有`。
+
+::: tip
+面向终端用户的应用（marketplace、docs）请见 [Apps](/apps/)；这里的 packages 是可被 import 的库。
+:::
 
 ## 全部 Packages
 
-| 包名 | 版本 | 描述 |
-|------|------|------|
-| [@aspect-mark/agent-pipeline](./agent-pipeline) | v2.0.0 | 多 Agent 流水线 MCP 插件 |
-| [@aspect-mark/shared](./shared) | v0.0.0 | 共享工具函数 |
+| 包名 | 版本 | 发布 | 描述 |
+|------|------|------|------|
+| [@aspect-mark/agent-pipeline](./agent-pipeline) | v2.1.0 | npm | 多 Agent 流水线 MCP 插件 |
+| [@aspect-mark/pipeline-dashboard](./pipeline-dashboard) | v1.0.0 | 私有 | agent-pipeline 配套的 Next.js 监控 UI |
+| [@aspect-mark/shared](./shared) | v0.0.0 | 即将发布 | 共享工具函数（tsdown 构建） |
 
 ## 安装
 

@@ -1,13 +1,18 @@
 # Packages Overview
 
-TypeScript packages in the Skills monorepo, managed via pnpm workspace and published to npm.
+TypeScript packages in the Skills monorepo, managed via pnpm workspace. Packages that ship to npm are marked `npm`; internal-only packages are marked `private`.
+
+::: tip
+End-user applications (marketplace, docs) live under [Apps](/en/apps/). This section is for libraries you `import`.
+:::
 
 ## All Packages
 
-| Package | Version | Description |
-|---------|---------|-------------|
-| [@aspect-mark/agent-pipeline](./agent-pipeline) | v2.0.0 | Multi-Agent Pipeline MCP Plugin |
-| [@aspect-mark/shared](./shared) | v0.0.0 | Shared Utility Functions |
+| Package | Version | Publish | Description |
+|---------|---------|---------|-------------|
+| [@aspect-mark/agent-pipeline](./agent-pipeline) | v2.1.0 | npm | Multi-Agent Pipeline MCP Plugin |
+| [@aspect-mark/pipeline-dashboard](./pipeline-dashboard) | v1.0.0 | private | Next.js monitoring UI bundled with agent-pipeline |
+| [@aspect-mark/shared](./shared) | v0.0.0 | upcoming | Shared utility functions (tsdown build) |
 
 ## Installation
 

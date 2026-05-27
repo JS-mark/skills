@@ -9,6 +9,7 @@ export const zh = defineConfig({
       { text: '指南', link: '/guide/introduction', activeMatch: '/guide/' },
       { text: 'Skills', link: '/skills/', activeMatch: '/skills/' },
       { text: 'Packages', link: '/packages/', activeMatch: '/packages/' },
+      { text: 'Apps', link: '/apps/', activeMatch: '/apps/' },
       { text: '更新日志', link: '/changelog' },
     ],
 
@@ -29,6 +30,7 @@ export const zh = defineConfig({
           items: [
             { text: '总览', link: '/skills/' },
             { text: 'agent-pipeline', link: '/skills/agent-pipeline' },
+            { text: 'github-trend-analyzer', link: '/skills/github-trend-analyzer' },
             { text: 'iconfont-downloader', link: '/skills/iconfont-downloader' },
             { text: 'drama-writer', link: '/skills/drama-writer' },
             { text: 'feature-planner', link: '/skills/feature-planner' },
@@ -43,7 +45,18 @@ export const zh = defineConfig({
           items: [
             { text: '总览', link: '/packages/' },
             { text: '@aspect-mark/agent-pipeline', link: '/packages/agent-pipeline' },
+            { text: '@aspect-mark/pipeline-dashboard', link: '/packages/pipeline-dashboard' },
             { text: '@aspect-mark/shared', link: '/packages/shared' },
+          ],
+        },
+      ],
+      '/apps/': [
+        {
+          text: 'Apps',
+          items: [
+            { text: '总览', link: '/apps/' },
+            { text: 'marketplace', link: '/apps/marketplace' },
+            { text: 'docs', link: '/apps/docs' },
           ],
         },
       ],
