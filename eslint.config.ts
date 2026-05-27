@@ -4,7 +4,7 @@ export default antfu({
   ignores: [
     'skills/**',
     'packages/agent-pipeline/src/**',
-    'packages/docs/**',
+    'apps/docs/**',
     'apps/marketplace/.nuxt/**',
     'apps/marketplace/.output/**',
   ],

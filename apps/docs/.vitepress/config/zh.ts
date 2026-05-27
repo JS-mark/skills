@@ -50,7 +50,7 @@ export const zh = defineConfig({
     },
 
     editLink: {
-      pattern: 'https://github.com/JS-mark/skills/edit/main/packages/docs/:path',
+      pattern: 'https://github.com/JS-mark/skills/edit/main/apps/docs/:path',
       text: '在 GitHub 上编辑此页',
     },
 

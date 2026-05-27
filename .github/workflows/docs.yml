@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'packages/docs/**'
+      - 'apps/docs/**'
   workflow_dispatch:
 
 permissions:
@@ -41,7 +41,7 @@ jobs:
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: packages/docs/.vitepress/dist
+          path: apps/docs/.vitepress/dist
 
   deploy:
     environment:

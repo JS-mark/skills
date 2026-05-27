@@ -38,9 +38,9 @@ packages/              → TypeScript packages (pnpm workspace members)
     dashboard/             Pre-built Next.js static export (copied from pipeline-dashboard)
   pipeline-dashboard/    Next.js web UI for monitoring pipeline progress (private, not published)
   shared/                Shared TS utilities — built with tsdown (ESM + CJS + dts)
-  docs/                  VitePress documentation site (private)
 
-apps/                  → Web applications (pnpm workspace members)
+apps/                  → Web applications & sites (pnpm workspace members)
+  docs/                  VitePress documentation site (private)
   marketplace/           Nuxt 3 app — Skill & MCP marketplace (Vercel deployed, SSR)
 
 scripts/               → Dev tooling (run with tsx)
@@ -58,7 +58,7 @@ scripts/               → Dev tooling (run with tsx)
 ## Code Style
 
 - ESLint with `@antfu/eslint-config` — no Prettier
-- Ignores: `skills/**`, `packages/agent-pipeline/src/**`, `packages/docs/**`, `apps/marketplace/.nuxt/**`
+- Ignores: `skills/**`, `packages/agent-pipeline/src/**`, `apps/docs/**`, `apps/marketplace/.nuxt/**`
 - Follow Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`)
 - Package names use `@aspect-mark/` scope
 - Shared devDependencies use `catalog:` references in pnpm-workspace.yaml
