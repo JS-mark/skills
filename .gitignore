@@ -32,8 +32,8 @@ pnpm-debug.log*
 */settings.local.json
 
 # VitePress
-packages/docs/.vitepress/dist/
-packages/docs/.vitepress/cache/
+apps/docs/.vitepress/dist/
+apps/docs/.vitepress/cache/
 
 packages/pipeline-dashboard/out/
 packages/pipeline-dashboard/.next/
