@@ -44,9 +44,13 @@ const DEFAULT_SOURCES: MarketSource[] = [
 ]
 
 export default defineNitroPlugin(async () => {
-  const storage = useStorage('data')
-  const existing = await storage.getItem('sources:index')
-  if (!existing) {
-    await storage.setItem('sources:index', DEFAULT_SOURCES)
+  try {
+    const storage = useStorage('data')
+    const existing = await storage.getItem('sources:index')
+    if (!existing)
+      await storage.setItem('sources:index', DEFAULT_SOURCES)
+  }
+  catch (err) {
+    console.error('[init-storage] failed to seed default sources:', err)
   }
 })
