@@ -88,7 +88,7 @@ allowed-tools: Bash, Read, Write, WebFetch, WebSearch, AskUserQuestion
 每次执行 **必须** 把报告与原始数据放在同一个自包含目录下，便于打包、归档、二次分析：
 
 ```
-./github-trend-report-YYYY-MM-DD/
+$TREND_REPORT_DIR/github-trend-report-YYYY-MM-DD/
 ├── report.md              # 结构化报告（见「输出格式」章节）
 └── data/
     ├── new.json           # 新生项目原始 API 返回
@@ -96,10 +96,26 @@ allowed-tools: Bash, Read, Write, WebFetch, WebSearch, AskUserQuestion
     └── top.json           # Star 高项目原始 API 返回
 ```
 
+**输出根路径 `TREND_REPORT_DIR`**（按优先级查找）：
+
+1. shell 环境变量 `$TREND_REPORT_DIR`
+2. `~/.env` 中的 `TREND_REPORT_DIR=...`（与 `GITHUB_TOKEN` 同套加载逻辑）
+3. **默认值：`$HOME/Desktop`**（macOS 桌面，Linux 同名目录若不存在则降级为 `$HOME`）
+
+加载规范：
+
+```bash
+: "${TREND_REPORT_DIR:=$HOME/Desktop}"
+TREND_REPORT_DIR="${TREND_REPORT_DIR/#\~/$HOME}"          # 展开 ~（.env 里写 ~/Desktop 可用）
+[ -d "$TREND_REPORT_DIR" ] || TREND_REPORT_DIR="$HOME"   # 桌面目录不存在则降级
+mkdir -p "$TREND_REPORT_DIR"
+```
+
 约定：
 
 - 目录名格式固定为 `github-trend-report-YYYY-MM-DD`，方便多次跑出多份报告时按日期归档
-- 采集阶段先写入 `/tmp/gh_demo/*.json`（避免污染工作目录），最终步骤再 `cp` 到 `./<目录>/data/`
+- 全部产物 `cp` 到 `$TREND_REPORT_DIR/<目录>/`，**不要** 落在当前工作目录污染用户仓库
+- 采集阶段仍可先写 `/tmp/gh_demo/*.json` 作为临时区，最终步骤再统一拷贝到 `$TREND_REPORT_DIR/<目录>/data/`
 - `report.md` 末尾「附：原始数据」章节使用相对路径 `data/*.json`，让目录可独立移动/分享
 - 用户可要求生成压缩包并发送邮件 → 见「步骤六」
 
@@ -308,11 +324,15 @@ MAIL_TO=mark@example.com        # 选填，缺省则用 AskUserQuestion 询问
 #### 6.2 打包
 
 ```bash
-DIR="github-trend-report-$(date +%Y-%m-%d)"
+: "${TREND_REPORT_DIR:=$HOME/Desktop}"
+TREND_REPORT_DIR="${TREND_REPORT_DIR/#\~/$HOME}"
+[ -d "$TREND_REPORT_DIR" ] || TREND_REPORT_DIR="$HOME"
+DIR="$TREND_REPORT_DIR/github-trend-report-$(date +%Y-%m-%d)"
 ZIP="${DIR}.zip"
 [ -d "$DIR" ] || { echo "目录不存在：$DIR"; exit 1; }
 rm -f "$ZIP"
-zip -r "$ZIP" "$DIR" >/dev/null
+# 在 TREND_REPORT_DIR 内打包，使 ZIP 内只含 github-trend-report-YYYY-MM-DD/ 这一层
+( cd "$TREND_REPORT_DIR" && zip -r "$(basename "$ZIP")" "$(basename "$DIR")" >/dev/null )
 ls -la "$ZIP"
 ```
 

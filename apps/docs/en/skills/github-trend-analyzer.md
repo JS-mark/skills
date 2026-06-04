@@ -24,12 +24,12 @@ ln -s "$(pwd)/skills/github-trend-analyzer" ~/.claude/skills/github-trend-analyz
 
 ### Dependencies
 
-| Tool | Required | Purpose |
-|------|----------|---------|
-| `curl` `jq` `date` | Yes | Bundled with macOS / Linux |
-| `zip` | For email attachment | Bundled with macOS / Linux |
-| `python3` (≥ 3.8) | For email sending | Stdlib only, no pip packages |
-| `GITHUB_TOKEN` | Optional | Lifts rate limit: 60/h → 5000/h |
+| Tool               | Required             | Purpose                         |
+|--------------------|----------------------|---------------------------------|
+| `curl` `jq` `date` | Yes                  | Bundled with macOS / Linux      |
+| `zip`              | For email attachment | Bundled with macOS / Linux      |
+| `python3` (≥ 3.8)  | For email sending    | Stdlib only, no pip packages    |
+| `GITHUB_TOKEN`     | Optional             | Lifts rate limit: 60/h → 5000/h |
 
 ## Usage
 
@@ -72,14 +72,14 @@ GITHUB_TOKEN="ghp_xxxxxxxxxxxx"
 
 ### SMTP config (optional, email only)
 
-| Variable | Purpose | Default |
-|----------|---------|---------|
-| `SMTP_HOST` | SMTP server | none |
-| `SMTP_PORT` | Port (465=SSL, 587=STARTTLS) | none |
-| `SMTP_USER` | login username | none |
-| `SMTP_PASS` | App-specific password | none |
-| `SMTP_FROM` | from address | = SMTP_USER |
-| `SMTP_TLS` | `ssl` or `starttls` | inferred from port |
+| Variable    | Purpose                      | Default            |
+|-------------|------------------------------|--------------------|
+| `SMTP_HOST` | SMTP server                  | none               |
+| `SMTP_PORT` | Port (465=SSL, 587=STARTTLS) | none               |
+| `SMTP_USER` | login username               | none               |
+| `SMTP_PASS` | App-specific password        | none               |
+| `SMTP_FROM` | from address                 | = SMTP_USER        |
+| `SMTP_TLS`  | `ssl` or `starttls`          | inferred from port |
 
 ::: warning Security
 For QQ / 163 / Gmail etc. you must use an app-specific password (or "authorization code"), not your account login password.
@@ -102,15 +102,15 @@ When emailing, an additional `<folder>.zip` and `report.html` preview are produc
 
 ## Report sections
 
-| Section | Content |
-|---------|---------|
-| Sample metadata | Time window, domain, sample size, auth status |
-| Three samples | Top N for new / engaged / starred |
-| Pattern synthesis | Language mix, topic frequency, name length, license distribution |
-| Design checklist | Positioning / naming / tech / docs / community / monetization |
+| Section              | Content                                                           |
+|----------------------|-------------------------------------------------------------------|
+| Sample metadata      | Time window, domain, sample size, auth status                     |
+| Three samples        | Top N for new / engaged / starred                                 |
+| Pattern synthesis    | Language mix, topic frequency, name length, license distribution  |
+| Design checklist     | Positioning / naming / tech / docs / community / monetization     |
 | 🚀 Project Blueprint | Codename / positioning / scenarios / MVP / stack / repo / roadmap |
-| Risks & pitfalls | Red-ocean warnings + differentiation tips |
-| Appendix | data/*.json + re-analysis snippets |
+| Risks & pitfalls     | Red-ocean warnings + differentiation tips                         |
+| Appendix             | data/*.json + re-analysis snippets                                |
 
 ## Re-analyze without using rate limit
 
