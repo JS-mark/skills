@@ -48,6 +48,11 @@ export default defineNuxtConfig({
       type: 'libsql',
       url: ':memory:',
     },
+    // 构建期本地 content 数据库使用 Node 内置 node:sqlite（Node 22.5+ / 25），
+    // 避免 better-sqlite3 / sqlite3 的原生编译（node-gyp），从而无需在 Vercel 上编译原生模块。
+    experimental: {
+      nativeSqlite: true,
+    },
   },
 
   colorMode: {
