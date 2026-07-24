@@ -98,7 +98,24 @@ apps/marketplace/
 | POST | `/api/sources/sync` | 同步市场源 |
 | DELETE | `/api/sources/:id` | 删除市场源 |
 
+## 部署（Vercel）
+
+本应用通过仓库根的 monorepo 构建，产物为 Vercel Build Output (v3)。关键设置：
+
+- **Root Directory**：在 Vercel 项目设置中必须设为 `apps/marketplace`。`vercel.json` 的
+  `installCommand` / `buildCommand` 都以 `cd ../..` 回到 monorepo 根安装/构建，
+  产物落在 `apps/marketplace/.vercel/output`，与 `outputDirectory: .vercel/output`
+  （相对 Root Directory）自洽。若 Root Directory 不是 `apps/marketplace`，路径会错位导致部署失败。
+- **Storage（Blob Store）**：数据存储驱动由 `STORAGE_DRIVER=vercelBlob` 选择，需要
+  `BLOB_READ_WRITE_TOKEN`。在 Vercel 项目 **Storage → Create Blob Store** 创建后会自动注入该变量。
+  未注入时应用会降级到 `memory` 驱动（数据不持久），仅用于兜底、不建议生产使用。
+- **构建环境变量**：`NITRO_PRESET=vercel` 与 `STORAGE_DRIVER=vercelBlob` 已在 `vercel.json`
+  的 `build.env` 中声明，无需手动配置。
+- **原生依赖**：`@nuxt/content` 构建期使用的本地 SQLite 已切换为 Node 内置 `node:sqlite`
+  （`content.experimental.nativeSqlite: true`，需 Node ≥ 22.5，Vercel 默认运行时满足），
+  因此 install 阶段**不再触发 `better-sqlite3` / `sqlite3` 的 node-gyp 原生编译**。
+
 ## 环境要求
 
-- Node.js >= 18
+- Node.js >= 22.5（构建期使用 Node 内置 `node:sqlite`）
 - pnpm >= 9
